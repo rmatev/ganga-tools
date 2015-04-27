@@ -1,7 +1,17 @@
 # ganga-tools
 Ganga tools and extensions for LHCb
 
-## Tools
+# Plugins
+### LHCbCompleteChecker
+A _checker_ that ensures that all input files were fully processed
+(using the metadata). This is a simplified version of the existing
+`LHCbMetaDataChecker`, which also overcomes some deficiencies.
+
+Use:
+```python
+job.postprocessors.append(LHCbCompleteChecker())
+```
+
 ### LHCbBookkeepingChecker
 A _checker_ that compares the number of processed events as reported in
 the metadata and the number of events from the bookkeeping (_EventStat_ field).
@@ -13,7 +23,6 @@ Use:
 ```python
 job.postprocessors.append(LHCbBookkeepingChecker())
 ```
-
 ### SplitByFilesAndRun
 A _splitter_ that is similar to `SplitByFiles` but ensures that each subjob's
 input contains files from one _run_ only.
