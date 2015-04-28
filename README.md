@@ -6,6 +6,8 @@ Ganga tools and extensions for LHCb
 A _checker_ that ensures that all input files were fully processed
 (using the metadata). This is a simplified version of the existing
 `LHCbMetaDataChecker`, which also overcomes some deficiencies.
+This checker is not suitable if only part of the input is processed
+(e.g. `EvtMax` is used).
 
 Use:
 ```python
@@ -14,7 +16,8 @@ job.postprocessors.append(LHCbCompleteChecker())
 
 ### LHCbBookkeepingChecker
 A _checker_ that compares the number of processed events as reported in
-the metadata and the number of events from the bookkeeping (_EventStat_ field).
+the metadata and the number of events from the bookkeeping
+(_EventStat/FullStat_ field).
 Fails if the processed and the expected number of events differ.
 This checker is not suitable if only part of the input is processed
 (e.g. `EvtMax` is used).
