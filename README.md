@@ -50,7 +50,7 @@ gdownload --help
 Merge job output files directly (w/o downloading). Currenly only ROOT files are
 supported.
 ```sh
-gdmerge --help
+gmerge --help
 ```
 
 ## Utility functions
