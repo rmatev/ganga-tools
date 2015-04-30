@@ -1,0 +1,31 @@
+#!/usr/bin/env ganga
+import os
+import argparse
+import tempfile
+from gutils.utils import subjobs
+from gutils.download import download
+from gutils.merge import download_merge
+
+parser = argparse.ArgumentParser(description='Download (and merge) outputfiles')
+parser.add_argument('jobs', nargs='+', help='Job IDs')
+parser.add_argument('--name', '-n', default='DVntuples.root', help='Name of job output file in job.outputfiles')
+parser.add_argument('--output', '-o', default=tempfile.gettempdir(), help='Where to put the downloaded (and merged) files?')
+parser.add_argument('--merge', action='store_true', help='Merge')
+parser.add_argument('--overwrite', action='store_true')
+args = parser.parse_args()
+
+jobs = [Ganga.GPI.jobs(i) for i in args.jobs]
+unique_names = list(set(j.name for j in subjobs(jobs)))
+print 'Downloading/merging files for job(s)', unique_names
+
+# if only one job is given, download in a directory named after the job
+if len(unique_names) == 1 and not args.merge:
+    args.output = os.path.join(args.output, unique_names[0])
+    os.mkdir(args.output)
+
+if not args.merge:
+    download(jobs, args.name, args.output)
+else:
+    download_merge(jobs, args.name, args.output, overwrite=args.overwrite)
+
+print 'Your downloads (merged file) is at', args.output
