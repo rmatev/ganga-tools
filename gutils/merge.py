@@ -19,7 +19,7 @@ def _merge_root(inputs, output):
     config['ROOT']['version'] = old_ver
 
 
-def _prepare_merge(jobs, name, path, overwrite):
+def _prepare_merge(jobs, name, path, overwrite=False, ignore_missing=False):
     if any(x in name for x in ['*', '?', '[', ']']):
         raise ValueError('Wildcard characters in name not supported.')
 
@@ -36,13 +36,13 @@ def _prepare_merge(jobs, name, path, overwrite):
         if not overwrite:
             raise ValueError('File "{}" already exists.'.format(path))
 
-    files = outputfiles(jobs, name, one_per_job=True)
+    files = outputfiles(jobs, name, one_per_job=True, ignore_missing=ignore_missing)
 
     return (files, path)
 
 
-def download_merge(jobs, name, path, overwrite=False, parallel=True, keep_temp=False):
-    files, path = _prepare_merge(jobs, name, path, overwrite)
+def download_merge(jobs, name, path, parallel=True, keep_temp=False, **kwargs):
+    files, path = _prepare_merge(jobs, name, path, **kwargs)
 
     tempdir = tempfile.mkdtemp(prefix='merge-{}-'.format(name))
     filenames = download_files(files, tempdir, parallel)
@@ -53,8 +53,8 @@ def download_merge(jobs, name, path, overwrite=False, parallel=True, keep_temp=F
     if not keep_temp: shutil.rmtree(tempdir)
 
 
-def direct_merge(jobs, name, path, overwrite=False):
-    files, path = _prepare_merge(jobs, name, path, overwrite)
+def direct_merge(jobs, name, path, **kwargs):
+    files, path = _prepare_merge(jobs, name, path, **kwargs)
 
     if not files:
         raise RuntimeError('No files found for given job(s). Check the name pattern.')

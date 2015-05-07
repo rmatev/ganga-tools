@@ -46,10 +46,10 @@ def download_files(files, path, parallel=True, block=True):
     return filenames
 
 
-def download(jobs, name, path, parallel=True):
+def download(jobs, name, path, parallel=True, ignore_missing=False):
     if any(x in name for x in ['*', '?', '[', ']']):
         raise ValueError('Wildcard characters in name not supported.')
-    files = outputfiles(jobs, name, one_per_job=True)
+    files = outputfiles(jobs, name, one_per_job=True, ignore_missing=ignore_missing)
     download_files(files, path, parallel)
 
 

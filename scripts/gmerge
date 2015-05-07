@@ -9,12 +9,13 @@ parser = argparse.ArgumentParser(description='Directly merge outputfiles')
 parser.add_argument('jobs', nargs='+', help='Job IDs')
 parser.add_argument('--name', '-n', default='DVntuples.root', help='Name of job output file in job.outputfiles')
 parser.add_argument('--output', '-o', default=tempfile.gettempdir(), help='Where to put the merged file?')
-parser.add_argument('--overwrite', action='store_true')
+parser.add_argument('--overwrite', action='store_true', help='Overwrite existing output file')
+parser.add_argument('--ignore-missing', action='store_true', help='Ignore missing output files')
 args = parser.parse_args()
 
 jobs = [Ganga.GPI.jobs(i) for i in args.jobs]
 unique_names = list(set(j.name for j in subjobs(jobs)))
 print 'Downloading/merging files for job(s)', unique_names
 
-direct_merge(jobs, args.name, args.output, overwrite=args.overwrite)
+direct_merge(jobs, args.name, args.output, overwrite=args.overwrite, ignore_missing=args.ignore_missing)
 print 'Your merged file is at', args.output
