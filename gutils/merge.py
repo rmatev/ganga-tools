@@ -5,7 +5,29 @@ from collections import defaultdict
 import Ganga
 from utils import outputfiles
 from download import download_files, get_access_urls
+from ROOT import TFile
 
+def _get_entries_of_trees(files):
+    """Get number of entries of all trees in files"""
+    if not hasattr(files,"__iter__"): #allow single tree to be passed
+        files = [files]
+    entries = defaultdict(int)
+    for f in files:
+        #open file
+        file0 = TFile.Open(f)
+        #get trees
+        keys = set(key.GetName() for key in file0.GetListOfKeys())
+        #set(file0.Get(key) for key in keys if file0.Get(key).IsA().GetName() == 'TTree')
+        #should be faster, because one less Get():
+        trees = set()
+        for key in keys:
+            obj = file0.Get(key)
+            if obj.IsA().GetName() == 'TTree':
+                trees.add(obj)
+        #get entries
+        for tree in trees:
+            entries[tree.GetName()] += tree.GetEntries() #could use key again here, but set is not ordered
+    return entries
 
 def _merge_root(inputs, output):
     config = Ganga.GPI.config
