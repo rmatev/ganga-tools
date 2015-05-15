@@ -5,28 +5,28 @@ from collections import defaultdict
 import Ganga
 from utils import outputfiles
 from download import download_files, get_access_urls
-from ROOT import TFile, TTree, TDirectory
 
 def _get_trees(x,dir_name=""):
     """Recursively get trees from x.
-       x can be a TFile or a TDirectory derivative
+       x can be a TFile, a TDirectory or similar
        Returns a tuple: (tree_name, tree_object)
     """
     keys = set(key.GetName() for key in x.GetListOfKeys())
     trees = set()
     for key in keys:
         obj = x.Get(key)
-        if obj.IsA().InheritsFrom(TTree.Class()):
+        if obj.IsA().GetName() == "TTree":
             trees.add((dir_name+obj.GetName(),obj))
-        elif obj.IsA().InheritsFrom(TDirectory.Class()):
+        elif obj.IsA().GetName() == "TDirectory":
             trees = trees.union(_get_trees(obj,obj.GetName()+"/"))
     return trees
 
-def _get_entries_of_trees(files):
+def _get_entries(files):
     """Get number of entries of all trees in files
        Returns a dictionary: {"tree_name":tree_entries}
        tree_name includes the directory name(s), if applicable
     """
+    from ROOT import TFile
     if not hasattr(files,"__iter__"): #allow single tree to be passed
         files = [files]
     entries = defaultdict(int)
@@ -47,6 +47,8 @@ def _merge_root(inputs, output):
     rootMerger._impl.mergefiles(inputs, output)
 
     config['ROOT']['version'] = old_ver
+    
+    assert _get_entries(inputs) == _get_entries(output)
 
 
 def _prepare_merge(jobs, name, path, overwrite=False, ignore_missing=False):
