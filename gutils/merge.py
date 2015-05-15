@@ -36,15 +36,17 @@ def _get_entries(files,ignore_empty=False,ignore_missing=False):
         file0 = TFile.Open(f)
         if not file0:
             if ignore_missing:
-                print "Warning: Can not find/open file: "+f
+                print "Warning: Can't find/open file: "+f
                 continue
             raise IOError("Can't find/open file: "+f)
+
         trees = _get_trees(file0)
         if not trees:
             if ignore_empty:
                 print 'Warning: No TTree objects found in '+f
                 continue
             raise ValueError('No TTree objects found in '+f)
+
         for name, tree in trees:
             entries[name] += tree.GetEntries()
     return entries
