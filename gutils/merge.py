@@ -8,33 +8,42 @@ from download import download_files, get_access_urls
 
 def _get_trees(x,dir_name=""):
     """Recursively get trees from x.
-       x can be a TFile, a TDirectory or similar
-       Returns a tuple: (tree_name, tree_object)
+       x can be a TFile or a TDirectoryFile
+       Adds dir_name/ to the beginning of the name of the object
+       Returns a set of tuples: set( (tree_name, tree_object) )
     """
-    keys = set(key.GetName() for key in x.GetListOfKeys())
     trees = set()
+    keys = set(key.GetName() for key in x.GetListOfKeys())
     for key in keys:
         obj = x.Get(key)
         if obj.IsA().GetName() == "TTree":
             trees.add((dir_name+obj.GetName(),obj))
-        elif obj.IsA().GetName() == "TDirectory":
+        elif obj.IsA().GetName() == "TDirectoryFle":
             trees = trees.union(_get_trees(obj,obj.GetName()+"/"))
     return trees
 
-def _get_entries(files):
+def _get_entries(files,ignore_empty=False):
     """Get number of entries of all trees in files
        Returns a dictionary: {"tree_name":tree_entries}
        tree_name includes the directory name(s), if applicable
     """
     from ROOT import TFile
-    if not hasattr(files,"__iter__"): #allow single tree to be passed
+    from collections import defaultdict
+    if not hasattr(files,"__iter__"): #allow single filename to be passed
         files = [files]
     entries = defaultdict(int)
     for f in files:
         file0 = TFile.Open(f)
+        if not file0:
+            raise IOError("Can't find/open file: "+f)
         trees = _get_trees(file0)
-        for tree in trees:
-            entries[tree[0]] += tree[1].GetEntries()
+        if not trees:
+            if ignore_empty:
+                print 'Warning: No TTree objects found in '+f
+            else:
+                raise ValueError('No TTree objects found in '+f)
+        for name, tree in trees:
+            entries[name] += tree.GetEntries()
     return entries
 
 def _merge_root(inputs, output):
