@@ -18,8 +18,8 @@ def _get_trees(x,dir_name=""):
         obj = x.Get(key)
         if obj.IsA().GetName() == "TTree":
             trees.add((dir_name+obj.GetName(),obj))
-        elif obj.IsA().GetName() == "TDirectoryFle":
-            trees = trees.union(_get_trees(obj,obj.GetName()+"/"))
+        elif obj.IsA().GetName() == "TDirectoryFile":
+            trees = trees.union(_get_trees(obj,dir_name+obj.GetName()+"/"))
     return trees
 
 def _get_entries(files,ignore_empty=False,ignore_missing=False):
