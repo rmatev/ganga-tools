@@ -5,28 +5,36 @@ from collections import defaultdict
 import Ganga
 from utils import outputfiles
 from download import download_files, get_access_urls
-from ROOT import TFile
+from ROOT import TFile, TTree, TDirectory
+
+def _get_trees(x,dir_name=""):
+    """Recursively get trees from x.
+       x can be a TFile or a TDirectory derivative
+       Returns a tuple: (tree_name, tree_object)
+    """
+    keys = set(key.GetName() for key in x.GetListOfKeys())
+    trees = set()
+    for key in keys:
+        obj = x.Get(key)
+        if obj.IsA().InheritsFrom(TTree.Class()):
+            trees.add((dir_name+obj.GetName(),obj))
+        elif obj.IsA().InheritsFrom(TDirectory.Class()):
+            trees = trees.union(_get_trees(obj,obj.GetName()+"/"))
+    return trees
 
 def _get_entries_of_trees(files):
-    """Get number of entries of all trees in files"""
+    """Get number of entries of all trees in files
+       Returns a dictionary: {"tree_name":tree_entries}
+       tree_name includes the directory name(s), if applicable
+    """
     if not hasattr(files,"__iter__"): #allow single tree to be passed
         files = [files]
     entries = defaultdict(int)
     for f in files:
-        #open file
         file0 = TFile.Open(f)
-        #get trees
-        keys = set(key.GetName() for key in file0.GetListOfKeys())
-        #set(file0.Get(key) for key in keys if file0.Get(key).IsA().GetName() == 'TTree')
-        #should be faster, because one less Get():
-        trees = set()
-        for key in keys:
-            obj = file0.Get(key)
-            if obj.IsA().GetName() == 'TTree':
-                trees.add(obj)
-        #get entries
+        trees = _get_trees(file0)
         for tree in trees:
-            entries[tree.GetName()] += tree.GetEntries() #could use key again here, but set is not ordered
+            entries[tree[0]] += tree[1].GetEntries()
     return entries
 
 def _merge_root(inputs, output):
