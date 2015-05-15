@@ -9,8 +9,8 @@ from download import download_files, get_access_urls
 def _get_trees(x,dir_name=""):
     """Recursively get trees from x.
        x can be a TFile or a TDirectoryFile
-       Adds dir_name/ to the beginning of the name of the object
        Returns a set of tuples: set( (tree_name, tree_object) )
+       Prepends the name of the object with dir_name/
     """
     trees = set()
     keys = set(key.GetName() for key in x.GetListOfKeys())
