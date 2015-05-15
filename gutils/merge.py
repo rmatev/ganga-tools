@@ -36,7 +36,7 @@ def _get_entries(files,ignore_empty=False,ignore_missing=False):
         file0 = TFile.Open(f)
         if not file0:
             if ignore_missing:
-                print "Can't find/open file: "+f
+                print "Warning: Can not find/open file: "+f
                 continue
             raise IOError("Can't find/open file: "+f)
         trees = _get_trees(file0)
