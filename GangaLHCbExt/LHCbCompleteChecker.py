@@ -33,7 +33,7 @@ class LHCbCompleteChecker(IChecker):
     def check(self, job):
         """Checks metadata of job is within a certain range."""
         try:
-            nfullfiles = int(job.metadata['xmldatanumbers'].get('full', 0))
+            nfullfiles = len(job.metadata['xmldatafiles'].get('full', []))
         except KeyError:
             raise PostProcessException("The metadata value 'xmldatanumbers' was not defined")
         try:
@@ -43,5 +43,6 @@ class LHCbCompleteChecker(IChecker):
 
         ok = (nfullfiles == len(job.inputdata)) and (nskipped == 0)
         if not ok:
-            logger.info('LHCbCompleteChecker has failed job(%s)'%(job.fqid))
+            logger.info('LHCbCompleteChecker has failed job {} (len(inputdata)={}, nfullfiles={}, nskipped={})'.format(
+                job.fqid, len(job.inputdata), nfullfiles, nskipped))
         return ok
