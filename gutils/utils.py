@@ -1,3 +1,4 @@
+import os
 import Ganga
 import GangaDirac
 from Ganga.GPIDev.Base.Proxy import GPIProxyObject
@@ -18,7 +19,7 @@ def subjobs(jobs):
                 yield j
 
 
-def is_existing_file(file):
+def is_existing_file(file, job=None):
     """Is a an existing physical file is represented by a Ganga file object?"""
 
     if not isinstance(file, GPIProxyObject) or not isinstance(file._impl, IGangaFile):
@@ -32,7 +33,9 @@ def is_existing_file(file):
         # Ganga 6.0.44 does not set localDir of LocalFile thus no way
         # to check if file object is a placeholder or refers to a real file
         # TODO file a bug report
-        ok = True
+
+        # if job object is given, figure out location, otherwise return True
+        ok = os.path.isfile(os.path.join(job.outputdir, file.namePattern)) if job else True
     else:
         raise NotImplementedError('Do not know how to check if file exits {}'.format(repr(file)))
 
@@ -52,7 +55,7 @@ def outputfiles(jobs, pattern, one_per_job=False, ignore_missing=False):
         for file in job_files:
             # Here we need to check that the file exists. Unfortunatelly, Ganga does
             # not provide an abstract method of IGangaFile to do that, hence the "hack".
-            if not is_existing_file(file):
+            if not is_existing_file(file, job):
                 msg = 'File {} from job {} does not represent an existing physical file!'.format(repr(file), job.fqid)
                 if not ignore_missing:
                     raise RuntimeError(msg + '\nAre all (sub)jobs completed?')
