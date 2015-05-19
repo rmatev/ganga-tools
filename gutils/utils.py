@@ -26,8 +26,13 @@ def is_existing_file(file):
 
     if isinstance(file._impl, GangaDirac.Lib.Files.DiracFile):
         ok = bool(file.lfn)
-    elif isinstance(file, Ganga.GPIDev.Lib.File.MassStorageFile):
+    elif isinstance(file._impl, Ganga.GPIDev.Lib.File.MassStorageFile):
         ok = bool(file.location())
+    elif isinstance(file._impl, Ganga.GPIDev.Lib.File.LocalFile):
+        # Ganga 6.0.44 does not set localDir of LocalFile thus no way
+        # to check if file object is a placeholder or refers to a real file
+        # TODO file a bug report
+        ok = True
     else:
         raise NotImplementedError('Do not know how to check if file exits {}'.format(repr(file)))
 
@@ -56,3 +61,23 @@ def outputfiles(jobs, pattern, one_per_job=False, ignore_missing=False):
             else:
                 files.append((job, file))
     return files
+
+
+def recheck(jobs, only_failed=True):
+    """Re-check (only failed) subjobs"""
+    for job in subjobs(jobs):
+        if job.status == 'failed' or (not only_failed and job.status == 'completed'):
+            # TODO this way of rerunning checkers may not work in the future
+            # see GANGA-1984
+            job.force_status('completed')
+
+
+def resubmit(jobs, only_failed=True):
+    """Resubmit (only failed) subjobs"""
+    for job in subjobs(jobs):
+        if not only_failed or job.status == 'failed':
+            job.resubmit()
+
+def runtimes(jobs):
+    """Return list of runtimes of finished jobs (in seconds)"""
+    return [job.time.runtime().total_seconds() for job in subjobs(jobs) if job.status == 'completed']
