@@ -8,6 +8,8 @@ from Ganga.GPIDev.Base.Proxy import GPIProxyObject
 from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile
 from utils import outputfiles
 
+logger = Ganga.Utility.logging.getLogger('gutils.download')
+
 
 def get_file(file, path):
     if any(x in file.namePattern for x in ['*', '?', '[', ']']):
@@ -49,7 +51,7 @@ def download_files(files, path, parallel=True, block=True):
     return filenames
 
 
-def download(jobs, name, path, parallel=True, ignore_missing=False):
+def download(jobs, name, path, parallel=True, ignore_missing=True):
     if any(x in name for x in ['*', '?', '[', ']']):
         raise ValueError('Wildcard characters in name not supported.')
     files = outputfiles(jobs, name, one_per_job=True, ignore_missing=ignore_missing)

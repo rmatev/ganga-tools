@@ -2,38 +2,36 @@
 import os
 import argparse
 import tempfile
-from gutils.utils import subjobs
+from gutils.utils import smart_jobs_select
 from gutils.download import download
-from gutils.merge import download_merge
 
-parser = argparse.ArgumentParser(description='Download (and merge) outputfiles')
-parser.add_argument('jobs', nargs='+', help='Job IDs. One output per argument. Use comma separated values for merge accross (sub)jobs.')
+logger = Ganga.Utility.logging.getLogger('gdownload')
+
+parser = argparse.ArgumentParser(description='Download outputfiles')
+parser.add_argument('jobs', nargs='+', help='Job IDs')
 parser.add_argument('--name', '-n', required=True, help='Name of job output file in job.outputfiles')
-parser.add_argument('--output', '-o', default=tempfile.gettempdir(), help='Where to put the downloaded (and merged) files? Defaults to $TMPDIR')
-parser.add_argument('--merge', action='store_true', help='Merge')
+parser.add_argument('--output', '-o', default=tempfile.gettempdir(), help='Where to put the downloaded files? Defaults to $TMPDIR')
 parser.add_argument('--overwrite', action='store_true', help='Overwrite existing output file')
-parser.add_argument('--ignore-missing', action='store_true', help='Ignore missing output files, e.g. due to failed jobs')
-parser.add_argument('--keep-temp', action='store_true', help='Keep downloaded files if --merge is used')
 args = parser.parse_args()
 
 if not os.path.isdir(args.output):
-    parser.error('Ouput (--output) must be an existing directory!')
+    parser.error('Output (--output) must be an existing directory!')
 
-for spec in args.jobs:
-    ids = spec.split(',')
-    jobs = [Ganga.GPI.jobs(i) for i in ids]
-    unique_names = list(set(j.name for j in subjobs(jobs)))
-    print 'Downloading/merging files for job(s)', unique_names
+for specs in args.jobs:
+    jobs = smart_jobs_select(specs.split(','))
+
+    unique_names = list(set(j.name for j in jobs))
+    print 'Downloading files for job(s)', unique_names
 
     # if only one job is given, download in a directory named after the job
-    if len(unique_names) == 1 and not args.merge:
-    args.output = os.path.join(args.output, unique_names[0])
-    os.mkdir(args.output)
-
-    if not args.merge:
-        download(jobs, args.name, args.output, ignore_missing=args.ignore_missing)
+    if len(unique_names) == 1:
+        path = os.path.join(args.output, unique_names[0])
+        os.mkdir(path)
+        logger.info('Downloading files for job(s) {} named {}'.format(specs, unique_names[0]))
     else:
-        download_merge(jobs, args.name, args.output, overwrite=args.overwrite,
-                    ignore_missing=args.ignore_missing, keep_temp=args.keep_temp)
+        path = args.output
+        logger.warning('Downloading jobs with multiple names ({}).'.format(unique_names))
 
-print 'Your downloads (merged files) are at', args.output
+    download(jobs, args.name, path)
+
+    logger.info('Your downloads are at {}'.format(path))

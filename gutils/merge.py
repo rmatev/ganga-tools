@@ -6,6 +6,8 @@ import Ganga
 from utils import subjobs, outputfiles
 from download import download_files, get_access_urls
 
+logger = Ganga.Utility.logging.getLogger('gutils.merge')
+
 def _get_trees(x,dir_name=""):
     """Recursively get trees from x.
        x can be a TFile or a TDirectoryFile
@@ -65,12 +67,11 @@ def _merge_root(inputs, output):
     assert _get_entries(inputs) == _get_entries(output)
 
 
-def _prepare_merge(jobs, name, path, overwrite=False, ignore_missing=False):
+def _prepare_merge(jobs, name, path, overwrite=False, partial=False):
     if any(x in name for x in ['*', '?', '[', ']']):
         raise ValueError('Wildcard characters in name not supported.')
 
-    files = outputfiles(jobs, name, one_per_job=True, ignore_missing=ignore_missing)
-    partial = len(files) < len(list(subjobs(jobs)))
+    files = outputfiles(jobs, name, one_per_job=True)
 
     jobnames = set(j.name for j in jobs)
     if len(jobnames) != 1:
