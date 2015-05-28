@@ -113,7 +113,18 @@ def recheck(jobs, only_failed=True):
         if job.status == 'failed' or (not only_failed and job.status == 'completed'):
             # TODO this way of rerunning checkers may not work in the future
             # see GANGA-1984
+            logger.info('Re-checking job {}'.format(job.fqid))
+            if job.status == 'completed': job.force_status('failed')
             job.force_status('completed')
+        elif job.status == 'completed':
+            # This is a temporary hack for ganga v600r44
+            # TODO remove this when the proposed fix from GANGA-1984 is released
+            file_checkers = [p for p in job.postprocessors if isinstance(p._impl, Ganga.Lib.Checkers.Checker.FileChecker)]
+            if not all(p._impl.result for p in file_checkers):
+                for p in file_checkers: p._impl.result = True
+                logger.info('Re-checking job {}'.format(job.fqid))
+                job.force_status('failed')
+                job.force_status('completed')
 
 
 def resubmit(jobs, only_failed=True):
