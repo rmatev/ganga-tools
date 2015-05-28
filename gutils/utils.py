@@ -123,6 +123,7 @@ def recheck(jobs, only_failed=True):
             if not all(p._impl.result for p in file_checkers):
                 for p in file_checkers: p._impl.result = True
                 logger.info('Re-checking job {}'.format(job.fqid))
+                logger.warning('This is a hack necessary for ganga v600r44')
                 job.force_status('failed')
                 job.force_status('completed')
 
