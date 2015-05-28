@@ -85,8 +85,9 @@ def get_access_urls(files):
 
         if isinstance(file._impl, GangaDirac.Lib.Files.DiracFile):
             pass # deal with this case separately, see below
-        # elif isinstance(file._impl, Ganga.GPIDev.Lib.File.MassStorageFile):
-        #     pass
+        elif isinstance(file._impl, Ganga.GPIDev.Lib.File.MassStorageFile):
+            # TODO this is LHCb specific, but there is no generic easy way
+            urls[i] = 'root://eoslhcb.cern.ch/' + file.location()[0]
         elif isinstance(file._impl, Ganga.GPIDev.Lib.File.LocalFile):
             urls[i] = os.path.join(job.outputdir, file.namePattern)
         else:
