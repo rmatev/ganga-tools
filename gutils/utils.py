@@ -137,3 +137,10 @@ def resubmit(jobs, only_failed=True):
 def runtimes(jobs):
     """Return list of runtimes of finished jobs (in seconds)"""
     return [job.time.runtime().total_seconds() for job in subjobs(jobs) if job.status == 'completed']
+
+def status(job):
+    """Return an overview of how many subjobs are in what status"""
+    for stat in ["new","submitting","submitted","running","failed","completing","completed"]:
+        l = len(jobs.subjobs.select(status=stat))
+        if l > 0:
+            print stat+":", l
