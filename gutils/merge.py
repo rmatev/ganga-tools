@@ -10,15 +10,16 @@ def _get_trees(x,dir_name=""):
     """Recursively get trees from x.
        x can be a TFile or a TDirectoryFile
        Returns a set of tuples: set( (tree_name, tree_object) )
-       Prepends the name of the object with dir_name/
+       Prepends the name of the object with dir_name (dir_name should include a trailing /)
     """
     trees = set()
     keys = set(key.GetName() for key in x.GetListOfKeys())
     for key in keys:
         obj = x.Get(key)
-        if obj.IsA().GetName() == "TTree":
+        class_name = obj.IsA().GetName()
+        if class_name == "TTree":
             trees.add((dir_name+obj.GetName(),obj))
-        elif obj.IsA().GetName() == "TDirectoryFile":
+        elif class_name == "TDirectoryFile":
             trees = trees.union(_get_trees(obj,dir_name+obj.GetName()+"/"))
     return trees
 
