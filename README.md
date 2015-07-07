@@ -83,3 +83,6 @@ variable, e.g. add in `~/.bashrc`:
 ```sh
 export PATH=$HOME/ganga-tools/scripts:$PATH
 ```
+
+Optionally, increase the number of user threads (default to 3) by uncommenting
+and changing `# NumWorkerThreads = 3` in `~/.gangarc`

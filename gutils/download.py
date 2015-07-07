@@ -3,7 +3,12 @@ import time
 import tempfile
 from collections import defaultdict
 import Ganga
+import GangaDirac
+from Ganga.GPIDev.Base.Proxy import GPIProxyObject
+from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile
 from utils import outputfiles
+
+logger = Ganga.Utility.logging.getLogger('gutils.download')
 
 
 def get_file(file, path):
@@ -46,7 +51,7 @@ def download_files(files, path, parallel=True, block=True):
     return filenames
 
 
-def download(jobs, name, path, parallel=True, ignore_missing=False):
+def download(jobs, name, path, parallel=True, ignore_missing=True):
     if any(x in name for x in ['*', '?', '[', ']']):
         raise ValueError('Wildcard characters in name not supported.')
     files = outputfiles(jobs, name, one_per_job=True, ignore_missing=ignore_missing)
@@ -73,6 +78,26 @@ def dirac_get_access_urls(lfns):
 
 
 def get_access_urls(files):
-    lfns = [f.lfn for job,f in files]
-    urls_dict = dirac_get_access_urls(lfns)
-    return [urls_dict[lfn] for lfn in lfns]
+    urls = [None] * len(files)
+    for i,(job,file) in enumerate(files):
+        if not isinstance(file, GPIProxyObject) or not isinstance(file._impl, IGangaFile):
+            raise ValueError('file must be a Ganga file object!')
+
+        if isinstance(file._impl, GangaDirac.Lib.Files.DiracFile):
+            pass # deal with this case separately, see below
+        elif isinstance(file._impl, Ganga.GPIDev.Lib.File.MassStorageFile):
+            # TODO this is LHCb specific, but there is no generic easy way
+            urls[i] = 'root://eoslhcb.cern.ch/' + file.location()[0]
+        elif isinstance(file._impl, Ganga.GPIDev.Lib.File.LocalFile):
+            urls[i] = os.path.join(job.outputdir, file.namePattern)
+        else:
+            raise NotImplementedError('get_access_url() does not yet implement {}'.format(repr(file)))
+
+    # Collect all DiracFile(s) to make a single call to the Dirac API (calls are slow!)
+    dirac_lfns = [f.lfn for job,f in files if isinstance(f._impl, GangaDirac.Lib.Files.DiracFile)]
+    dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
+    for i,(job,file) in enumerate(files):
+        if isinstance(f._impl, GangaDirac.Lib.Files.DiracFile):
+            urls[i] = dirac_urls_dict[file.lfn]
+
+    return urls

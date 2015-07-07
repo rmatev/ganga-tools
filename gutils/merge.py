@@ -3,8 +3,10 @@ import shutil
 import tempfile
 from collections import defaultdict
 import Ganga
-from utils import outputfiles
+from utils import subjobs, outputfiles
 from download import download_files, get_access_urls
+
+logger = Ganga.Utility.logging.getLogger('gutils.merge')
 
 def _get_trees(x,dir_name=""):
     """Recursively get trees from x.
@@ -62,28 +64,28 @@ def _merge_root(inputs, output):
     rootMerger._impl.mergefiles(inputs, output)
 
     config['ROOT']['version'] = old_ver
-    
+
     assert _get_entries(inputs) == _get_entries(output)
 
 
-def _prepare_merge(jobs, name, path, overwrite=False, ignore_missing=False):
+def _prepare_merge(jobs, name, path, overwrite=False, partial=False):
     if any(x in name for x in ['*', '?', '[', ']']):
         raise ValueError('Wildcard characters in name not supported.')
+
+    files = outputfiles(jobs, name, one_per_job=True)
 
     jobnames = set(j.name for j in jobs)
     if len(jobnames) != 1:
         raise ValueError('Not all jobs have the same name ({}).'.format(jobnames))
     jobname = list(jobnames)[0]
 
-    default_filename = jobname + os.path.splitext(name)[1]
+    default_filename = jobname + ('-partial' if partial else '') + os.path.splitext(name)[1]
     path = os.path.abspath(path)
     if os.path.isdir(path):
         path = os.path.join(path, default_filename)
     if os.path.isfile(path):
         if not overwrite:
             raise ValueError('File "{}" already exists.'.format(path))
-
-    files = outputfiles(jobs, name, one_per_job=True, ignore_missing=ignore_missing)
 
     return (files, path)
 
