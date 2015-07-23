@@ -52,6 +52,7 @@ def _get_entries(files,ignore_empty=False,ignore_missing=False):
 
         for name, tree in trees:
             entries[name] += tree.GetEntries()
+        file0.Close("R")
     return entries
 
 def _merge_root(inputs, output):
