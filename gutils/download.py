@@ -59,6 +59,7 @@ def download(jobs, name, path, parallel=True, ignore_missing=True):
 
 
 def dirac_get_access_urls(lfns):
+    if isinstance(lfns, basestring): lfns = [lfns]
     if not lfns: return {}
 
     from GangaDirac.Lib.Utilities.DiracUtilities import execute
@@ -69,11 +70,14 @@ def dirac_get_access_urls(lfns):
     urls = {}
     for line in output.splitlines():
         items = [x.strip() for x in line.split(':', 1)]
-        if len(items) < 2: continue
+        if len(items) < 2 or items[0][0] != '/': continue
         k,v = items
-        if k not in lfns or 'file not found' in v.lower():
-            continue
-        if k not in urls: urls[k] = v
+        if k not in lfns:
+            logger.warning('Unexpected key (LFN) in output of dirac-dms-lfn-accessURL: ' + k)
+        elif 'file not found' in v.lower():
+            logger.error('File not found in the bookkeeping: ' + k)
+        elif k not in urls:
+            urls[k] = v
     return urls
 
 
@@ -98,6 +102,10 @@ def get_access_urls(files):
     dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
     for i,(job,file) in enumerate(files):
         if isinstance(f._impl, GangaDirac.Lib.Files.DiracFile):
-            urls[i] = dirac_urls_dict[file.lfn]
+            try:
+                urls[i] = dirac_urls_dict[file.lfn]
+            except KeyError:
+                logger.error('No available replica for LFN {} from job {}'.format(job.fqid))
+                raise RuntimeError('Cannot handle unaccessible files.')
 
     return urls
