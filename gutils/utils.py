@@ -77,24 +77,22 @@ def smart_jobs_select(specs):
 
     Examples:
         smart_jobs_select(['100', '-100.1', '105:110', '-108'])
+        smart_jobs_select(['100.0', '100.1', '100.10'])
     """
     jobs = []
     for spec in specs:
-        m = re.match(r"^(?P<int>^-?\d+)$|^(?P<float>^-?\d+\.\d+)$|^(?P<range1>\d+):(?P<range2>\d+)$", spec)
+        m = re.match(r"^(?P<remove>-)?((?P<master>\d+)|(?P<subjob>\d+\.\d+)|(?P<range1>\d+):(?P<range2>\d+))$", spec)
         if not m:
             raise ValueError("Unsupported spec '{}'".format(spec))
-        if m.group('int'):
-            sjobs = subjobs(Ganga.GPI.jobs(abs(int(m.group('int')))))
-            remove = m.group('int')[0] == '-'
-        elif m.group('float'):
-            sjobs = [Ganga.GPI.jobs(str(abs(float(m.group('float')))))]
-            remove = m.group('float')[0] == '-'
+        if m.group('master'):
+            sjobs = list(subjobs(Ganga.GPI.jobs(m.group('master'))))
+        elif m.group('subjob'):
+            sjobs = [Ganga.GPI.jobs(m.group('subjob'))]
         elif m.group('range1'):
-            sjobs = Ganga.GPI.jobs.select(int(m.group('range1')), int(m.group('range2')) + 1)
-            remove = False
+            sjobs = list(subjobs(Ganga.GPI.jobs.select(int(m.group('range1')), int(m.group('range2')))))
         else:
             assert False
-        if not remove:
+        if not m.group('remove'):
             jobs += filter(lambda j: j not in jobs, sjobs)  # add only unique
         else:
             jobs = filter(lambda j: j not in sjobs, jobs)  # keep only non-removed
