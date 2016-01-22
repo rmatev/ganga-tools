@@ -22,7 +22,7 @@ def DiracRunSplitter(inputs, filesPerJob, maxFiles, ignoremissing):
  
     runs = defaultdict(list)
     for lfn,v in metadata['Value']['Successful'].items():
-        f = [f for f in inputs.files if f.name == lfn][0]
+        f = [f for f in inputs.files if f.lfn == lfn][0]
         runs[v['RunNumber']].append(f)
     logger.info('Found %d runs in inputdata'%len(runs))
 

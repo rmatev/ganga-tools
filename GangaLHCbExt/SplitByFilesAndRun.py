@@ -5,7 +5,7 @@ from GangaGaudi.Lib.Splitters.GaudiInputDataSplitter import GaudiInputDataSplitt
 #from GangaGaudi.Lib.Splitters.SplitterUtils import DatasetSplitter
 from DiracRunSplitter import DiracRunSplitter as DiracSplitter  # change!
 #from SplitterUtils import DiracSplitter
-from GangaLHCb.Lib.LHCbDataset import LogicalFile
+from GangaLHCb.Lib.Files import LogicalFile
 from Ganga.GPIDev.Adapters.ISplitter import SplittingError
 from Ganga.GPIDev.Schema import *
 from GangaLHCb.Lib.LHCbDataset.LHCbDataset import LHCbDataset
@@ -66,8 +66,7 @@ class SplitByFilesAndRun(GaudiInputDataSplitter):  # change!
 
     # returns splitter generator 
     def _splitter(self, job, inputdata):
-
-        indata = stripProxy(copy.deepcopy(job.inputdata))
+        indata = job.inputdata
         if not job.inputdata:
             share_path = os.path.join(expandfilename(getConfig('Configuration')['gangadir']),
                                       'shared',
