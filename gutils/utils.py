@@ -9,30 +9,38 @@ from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile
 
 logger = Ganga.Utility.logging.getLogger('gutils.utils')
 
+
+def ganga_type(x):
+    """Return the type of the underlying object or just type(x) if not a proxy."""
+    return type(x._impl) if isinstance(x, GPIProxyObject) else type(x)
+
+
 def subjobs(jobs):
     """Return an interator on the (flattened) subjobs."""
-    if isinstance(jobs, GPIProxyObject) and isinstance(jobs._impl, Job):
+    if (issubclass(ganga_type(jobs), Job)):
         if len(jobs.subjobs):
             for j in jobs.subjobs: yield j
         else:
             yield jobs
     else:
+        print type(jobs)
         for job in jobs:
             for j in subjobs(job):
                 yield j
 
 
 def is_existing_file(file, job=None):
-    """Is a an existing physical file is represented by a Ganga file object?"""
+    """Does the Ganga file object represent anexisting physical file?"""
 
-    if not isinstance(file, GPIProxyObject) or not isinstance(file._impl, IGangaFile):
+    file_type = ganga_type(file)
+    if not issubclass(file_type, IGangaFile):
         raise ValueError('file must be a Ganga file object!')
 
-    if isinstance(file._impl, GangaDirac.Lib.Files.DiracFile):
+    if issubclass(file_type, GangaDirac.Lib.Files.DiracFile):
         ok = bool(file.lfn)
-    elif isinstance(file._impl, Ganga.GPIDev.Lib.File.MassStorageFile):
+    elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
         ok = bool(file.location())
-    elif isinstance(file._impl, Ganga.GPIDev.Lib.File.LocalFile):
+    elif issubclass(file_type, Ganga.GPIDev.Lib.File.LocalFile):
         # Ganga 6.0.44 does not set localDir of LocalFile thus no way
         # to check if file object is a placeholder or refers to a real file
         # TODO file a bug report

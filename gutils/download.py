@@ -6,7 +6,7 @@ import Ganga
 import GangaDirac
 from Ganga.GPIDev.Base.Proxy import GPIProxyObject
 from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile
-from utils import outputfiles
+from utils import ganga_type, outputfiles
 
 logger = Ganga.Utility.logging.getLogger('gutils.download')
 
@@ -84,24 +84,25 @@ def dirac_get_access_urls(lfns):
 def get_access_urls(files):
     urls = [None] * len(files)
     for i,(job,file) in enumerate(files):
-        if not isinstance(file, GPIProxyObject) or not isinstance(file._impl, IGangaFile):
+        file_type = ganga_type(file)
+        if not issubclass(file_type, IGangaFile):
             raise ValueError('file must be a Ganga file object!')
 
-        if isinstance(file._impl, GangaDirac.Lib.Files.DiracFile):
+        if issubclass(file_type, GangaDirac.Lib.Files.DiracFile):
             pass # deal with this case separately, see below
-        elif isinstance(file._impl, Ganga.GPIDev.Lib.File.MassStorageFile):
+        elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
             # TODO this is LHCb specific, but there is no generic easy way
             urls[i] = 'root://eoslhcb.cern.ch/' + file.location()[0]
-        elif isinstance(file._impl, Ganga.GPIDev.Lib.File.LocalFile):
+        elif issubclass(file_type, Ganga.GPIDev.Lib.File.LocalFile):
             urls[i] = os.path.join(job.outputdir, file.namePattern)
         else:
             raise NotImplementedError('get_access_url() does not yet implement {}'.format(repr(file)))
 
     # Collect all DiracFile(s) to make a single call to the Dirac API (calls are slow!)
-    dirac_lfns = [f.lfn for job,f in files if isinstance(f._impl, GangaDirac.Lib.Files.DiracFile)]
+    dirac_lfns = [f.lfn for job,f in files if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile)]
     dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
     for i,(job,file) in enumerate(files):
-        if isinstance(f._impl, GangaDirac.Lib.Files.DiracFile):
+        if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile):
             try:
                 urls[i] = dirac_urls_dict[file.lfn]
             except KeyError:
