@@ -102,7 +102,10 @@ def smart_jobs_select(specs):
 
 def master_id(job):
     """Return the master id of a (sub)job."""
-    return job.master.id if job.master else job.id
+    # return job.master.id if job.master else job.id
+    # This is broken in Ganga 6.1.14, a work-around is needed.
+    # See https://github.com/ganga-devs/ganga/pull/108
+    return job.fqid.split('.')[0]
 
 
 def recheck(jobs, only_failed=True):
