@@ -23,7 +23,6 @@ def subjobs(jobs):
         else:
             yield jobs
     else:
-        print type(jobs)
         for job in jobs:
             for j in subjobs(job):
                 yield j
