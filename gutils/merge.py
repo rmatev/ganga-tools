@@ -110,3 +110,4 @@ def direct_merge(jobs, name, path, **kwargs):
         raise RuntimeError('No files found for given job(s). Check the name pattern.')
     urls = get_access_urls(files)
     _merge_root(urls, path)
+    return path
