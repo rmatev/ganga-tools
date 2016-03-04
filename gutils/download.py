@@ -5,7 +5,10 @@ from collections import defaultdict
 import Ganga
 import GangaDirac
 from Ganga.GPIDev.Base.Proxy import GPIProxyObject
-from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile
+try:
+    from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
+except ImportError:
+    from Ganga.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
 from utils import ganga_type, outputfiles
 
 logger = Ganga.Utility.logging.getLogger('gutils.download')
