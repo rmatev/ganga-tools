@@ -101,6 +101,7 @@ def download_merge(jobs, name, path, parallel=True, keep_temp=False, **kwargs):
     _merge_root(filenames, path)
 
     if not keep_temp: shutil.rmtree(tempdir)
+    return path
 
 
 def direct_merge(jobs, name, path, **kwargs):
