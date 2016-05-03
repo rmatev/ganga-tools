@@ -107,8 +107,8 @@ def get_access_urls(files):
         else:
             raise NotImplementedError('get_access_url() does not yet implement {}'.format(repr(f)))
 
-    # Collect all DiracFile(s) to make a single call to the Dirac API (calls are slow!)
-    if(len(dirac_lfsn) > 0):
+    # Make a single call to the Dirac API for all DiracFiles (calls are slow!)
+    if(len(dirac_lfns) > 0):
         dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
         for i, (job, f) in enumerate(files):
             if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile):
