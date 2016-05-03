@@ -8,6 +8,7 @@ from download import download_files, get_access_urls
 
 logger = Ganga.Utility.logging.getLogger('gutils.merge')
 
+
 def _get_trees(x,dir_name=""):
     """Recursively get trees from x.
        x can be a TFile or a TDirectoryFile
@@ -25,14 +26,15 @@ def _get_trees(x,dir_name=""):
             trees = trees.union(_get_trees(obj,dir_name+obj.GetName()+"/"))
     return trees
 
-def _get_entries(files,ignore_empty=False,ignore_missing=False):
+
+def _get_entries(files, ignore_empty=False, ignore_missing=False):
     """Get number of entries of all trees in files
        Returns a dictionary: {"tree_name":tree_entries}
        tree_name includes the directory name(s), if applicable
     """
     from ROOT import TFile
     from collections import defaultdict
-    if not hasattr(files,"__iter__"): #allow single filename to be passed
+    if not hasattr(files, "__iter__"):  # allow single filename to be passed
         files = [files]
     entries = defaultdict(int)
     for f in files:
@@ -55,13 +57,14 @@ def _get_entries(files,ignore_empty=False,ignore_missing=False):
         file0.Close("R")
     return entries
 
+
 def _merge_root(inputs, output):
     config = Ganga.GPI.config
     old_ver = config['ROOT']['version']
     config['ROOT']['version'] = '6.02.05'  # corresponds to DaVinci v36r5
 
-    #rootMerger = RootMerger(args='-f6')
-    rootMerger = Ganga.GPI.RootMerger(args='-O') # -O gives the best reading performance
+    # rootMerger = RootMerger(args='-f6')
+    rootMerger = Ganga.GPI.RootMerger(args='-O')  # -O gives the best reading performance
     rootMerger._impl.mergefiles(inputs, output)
 
     config['ROOT']['version'] = old_ver
@@ -100,7 +103,8 @@ def download_merge(jobs, name, path, parallel=True, keep_temp=False, **kwargs):
         raise RuntimeError('No files found for given job(s). Check the name pattern.')
     _merge_root(filenames, path)
 
-    if not keep_temp: shutil.rmtree(tempdir)
+    if not keep_temp:
+        shutil.rmtree(tempdir)
     return path
 
 
