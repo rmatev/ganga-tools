@@ -13,7 +13,8 @@ def _get_trees(x, dir_name=""):
     """Recursively get trees from x.
        x can be a TFile or a TDirectoryFile
        Returns a set of tuples: set( (tree_name, tree_object) )
-       Prepends the name of the object with dir_name (dir_name should include a trailing /)
+       Prepends the name of the object with dir_name
+       (dir_name should include a trailing /)
     """
     trees = set()
     keys = set(key.GetName() for key in x.GetListOfKeys())
@@ -64,7 +65,8 @@ def _merge_root(inputs, output):
     config['ROOT']['version'] = '6.02.05'  # corresponds to DaVinci v36r5
 
     # rootMerger = RootMerger(args='-f6')
-    rootMerger = Ganga.GPI.RootMerger(args='-O')  # -O gives the best reading performance
+    # -O gives the best reading performance:
+    rootMerger = Ganga.GPI.RootMerger(args='-O')
     rootMerger._impl.mergefiles(inputs, output)
 
     config['ROOT']['version'] = old_ver
