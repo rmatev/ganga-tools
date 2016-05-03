@@ -9,7 +9,7 @@ from download import download_files, get_access_urls
 logger = Ganga.Utility.logging.getLogger('gutils.merge')
 
 
-def _get_trees(x,dir_name=""):
+def _get_trees(x, dir_name=""):
     """Recursively get trees from x.
        x can be a TFile or a TDirectoryFile
        Returns a set of tuples: set( (tree_name, tree_object) )
@@ -21,9 +21,9 @@ def _get_trees(x,dir_name=""):
         obj = x.Get(key)
         class_name = obj.IsA().GetName()
         if class_name == "TTree":
-            trees.add((dir_name+obj.GetName(),obj))
+            trees.add((dir_name+obj.GetName(), obj))
         elif class_name == "TDirectoryFile":
-            trees = trees.union(_get_trees(obj,dir_name+obj.GetName()+"/"))
+            trees = trees.union(_get_trees(obj, dir_name+obj.GetName()+"/"))
     return trees
 
 
