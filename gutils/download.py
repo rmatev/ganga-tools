@@ -39,7 +39,7 @@ def download_files(files, path, parallel=True, block=True):
         raise ValueError('Path must be existing directory.')
 
     filenames = []
-    for job,file in files:
+    for job, file in files:
         root, ext = os.path.splitext(file.namePattern)
         fn = os.path.join(path, '{}-{}{}'.format(root, job.fqid, ext))
         filenames.append(fn)
@@ -49,7 +49,8 @@ def download_files(files, path, parallel=True, block=True):
             get_file(file, fn)
 
     if parallel and block:
-        while Ganga.GPI.queues.totalNumUserThreads(): time.sleep(2)
+        while Ganga.GPI.queues.totalNumUserThreads():
+            time.sleep(2)
 
     return filenames
 
@@ -68,7 +69,7 @@ def dirac_get_access_urls(lfns):
         return {}
     print "getting dirac access urls for:"
     print lfns
-    print "Using Dirac version {}".foramt(os.environ['GANGADIRACENVIRONMENT'].split(os.sep)[-1])
+    print "Using Dirac version {}".format(os.environ['GANGADIRACENVIRONMENT'].split(os.sep)[-1])
 
     from GangaDirac.Lib.Utilities.DiracUtilities import execute
     opts = '--Protocol root,xroot'
@@ -98,7 +99,7 @@ def get_access_urls(files):
             raise ValueError('file must be a Ganga file object!')
 
         if issubclass(file_type, GangaDirac.Lib.Files.DiracFile):
-            dirac_lfns.append(f.lfn) # deal with this case separately, see below
+            dirac_lfns.append(f.lfn)  # deal with this case separately below
         elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
             # TODO this is LHCb specific, but there is no generic easy way
             urls[i] = 'root://eoslhcb.cern.ch/' + f.location()[0]
