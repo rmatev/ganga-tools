@@ -91,8 +91,8 @@ def dirac_get_access_urls(lfns):
 
 def get_access_urls(files):
     urls = [None] * len(files)
-    for i, (job, file) in enumerate(files):
-        file_type = ganga_type(file)
+    for i, (job, f) in enumerate(files):
+        file_type = ganga_type(f)
         if not issubclass(file_type, IGangaFile):
             raise ValueError('file must be a Ganga file object!')
 
@@ -100,21 +100,20 @@ def get_access_urls(files):
             pass  # deal with this case separately, see below
         elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
             # TODO this is LHCb specific, but there is no generic easy way
-            urls[i] = 'root://eoslhcb.cern.ch/' + file.location()[0]
+            urls[i] = 'root://eoslhcb.cern.ch/' + f.location()[0]
         elif issubclass(file_type, Ganga.GPIDev.Lib.File.LocalFile):
-            urls[i] = os.path.join(job.outputdir, file.namePattern)
+            urls[i] = os.path.join(job.outputdir, f.namePattern)
         else:
-            raise NotImplementedError('get_access_url() does not yet implement {}'.format(repr(file)))
+            raise NotImplementedError('get_access_url() does not yet implement {}'.format(repr(f)))
 
     # Collect all DiracFile(s) to make a single call to the Dirac API (calls are slow!)
     dirac_lfns = [f.lfn for job, f in files if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile)]
     dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
-    for i, (job, file) in enumerate(files):
-        if issubclass(ganga_type(file), GangaDirac.Lib.Files.DiracFile):
+    for i, (job, f) in enumerate(files):
+        if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile):
             try:
-                urls[i] = dirac_urls_dict[file.lfn]
+                urls[i] = dirac_urls_dict[f.lfn]
             except KeyError:
                 logger.error('No available replica for LFN {} from job {}'.format(job.fqid))
                 raise RuntimeError('Cannot handle unaccessible files.')
-
     return urls
