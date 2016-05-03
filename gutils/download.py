@@ -91,13 +91,14 @@ def dirac_get_access_urls(lfns):
 
 def get_access_urls(files):
     urls = [None] * len(files)
+    dirac_lfns = []
     for i, (job, f) in enumerate(files):
         file_type = ganga_type(f)
         if not issubclass(file_type, IGangaFile):
             raise ValueError('file must be a Ganga file object!')
 
         if issubclass(file_type, GangaDirac.Lib.Files.DiracFile):
-            pass  # deal with this case separately, see below
+            dirac_lfns.append(f.lfn) # deal with this case separately, see below
         elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
             # TODO this is LHCb specific, but there is no generic easy way
             urls[i] = 'root://eoslhcb.cern.ch/' + f.location()[0]
@@ -107,13 +108,13 @@ def get_access_urls(files):
             raise NotImplementedError('get_access_url() does not yet implement {}'.format(repr(f)))
 
     # Collect all DiracFile(s) to make a single call to the Dirac API (calls are slow!)
-    dirac_lfns = [f.lfn for job, f in files if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile)]
-    dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
-    for i, (job, f) in enumerate(files):
-        if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile):
-            try:
-                urls[i] = dirac_urls_dict[f.lfn]
-            except KeyError:
-                logger.error('No available replica for LFN {} from job {}'.format(job.fqid))
-                raise RuntimeError('Cannot handle unaccessible files.')
+    if(len(dirac_lfsn) > 0):
+        dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
+        for i, (job, f) in enumerate(files):
+            if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile):
+                try:
+                    urls[i] = dirac_urls_dict[f.lfn]
+                except KeyError:
+                    logger.error('No available replica for LFN {} from job {}'.format(job.fqid))
+                    raise RuntimeError('Cannot handle unaccessible files.')
     return urls
