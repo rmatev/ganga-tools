@@ -62,8 +62,10 @@ def download(jobs, name, path, parallel=True, ignore_missing=True):
 
 
 def dirac_get_access_urls(lfns):
-    if isinstance(lfns, basestring): lfns = [lfns]
-    if not lfns: return {}
+    if isinstance(lfns, basestring):
+        lfns = [lfns]
+    if not lfns:
+        return {}
     print "getting dirac access urls for:"
     print lfns
     print "Using Dirac version {}".foramt(os.environ['GANGADIRACENVIRONMENT'].split(os.sep)[-1])
@@ -75,8 +77,9 @@ def dirac_get_access_urls(lfns):
     urls = {}
     for line in output.splitlines():
         items = [x.strip() for x in line.split(':', 1)]
-        if len(items) < 2 or items[0][0] != '/': continue
-        k,v = items
+        if len(items) < 2 or items[0][0] != '/':
+            continue
+        k, v = items
         if k not in lfns:
             logger.warning('Unexpected key (LFN) in output of dirac-dms-lfn-accessURL: ' + k)
         elif 'file not found' in v.lower():
@@ -104,10 +107,10 @@ def get_access_urls(files):
             raise NotImplementedError('get_access_url() does not yet implement {}'.format(repr(file)))
 
     # Collect all DiracFile(s) to make a single call to the Dirac API (calls are slow!)
-    dirac_lfns = [f.lfn for job,f in files if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile)]
+    dirac_lfns = [f.lfn for job, f in files if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile)]
     dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
-    for i, (job,file) in enumerate(files):
-        if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile):
+    for i, (job, file) in enumerate(files):
+        if issubclass(ganga_type(file), GangaDirac.Lib.Files.DiracFile):
             try:
                 urls[i] = dirac_urls_dict[file.lfn]
             except KeyError:
