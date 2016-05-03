@@ -64,6 +64,9 @@ def download(jobs, name, path, parallel=True, ignore_missing=True):
 def dirac_get_access_urls(lfns):
     if isinstance(lfns, basestring): lfns = [lfns]
     if not lfns: return {}
+    print "getting dirac access urls for:"
+    print lfns
+    print "Using Dirac version {}".foramt(os.environ['GANGADIRACENVIRONMENT'].split(os.sep)[-1])
 
     from GangaDirac.Lib.Utilities.DiracUtilities import execute
     opts = '--Protocol root,xroot'
@@ -85,13 +88,13 @@ def dirac_get_access_urls(lfns):
 
 def get_access_urls(files):
     urls = [None] * len(files)
-    for i,(job,file) in enumerate(files):
+    for i, (job, file) in enumerate(files):
         file_type = ganga_type(file)
         if not issubclass(file_type, IGangaFile):
             raise ValueError('file must be a Ganga file object!')
 
         if issubclass(file_type, GangaDirac.Lib.Files.DiracFile):
-            pass # deal with this case separately, see below
+            pass  # deal with this case separately, see below
         elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
             # TODO this is LHCb specific, but there is no generic easy way
             urls[i] = 'root://eoslhcb.cern.ch/' + file.location()[0]
@@ -103,7 +106,7 @@ def get_access_urls(files):
     # Collect all DiracFile(s) to make a single call to the Dirac API (calls are slow!)
     dirac_lfns = [f.lfn for job,f in files if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile)]
     dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
-    for i,(job,file) in enumerate(files):
+    for i, (job,file) in enumerate(files):
         if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile):
             try:
                 urls[i] = dirac_urls_dict[file.lfn]
