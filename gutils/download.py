@@ -67,9 +67,6 @@ def dirac_get_access_urls(lfns):
         lfns = [lfns]
     if not lfns:
         return {}
-    print "getting dirac access urls for:"
-    print lfns
-    print "Using Dirac version {}".format(os.environ['GANGADIRACENVIRONMENT'].split(os.sep)[-1])
 
     from GangaDirac.Lib.Utilities.DiracUtilities import execute
     opts = '--Protocol root,xroot'
