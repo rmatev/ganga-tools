@@ -69,7 +69,7 @@ def dirac_get_access_urls(lfns):
         return {}
 
     from GangaDirac.Lib.Utilities.DiracUtilities import execute
-    opts = '--Protocol root,xroot'
+    opts = '--Protocol xroot,root'
     cmd = 'dirac-dms-lfn-accessURL {} {}'.format(','.join(lfns), opts)
     output = execute(cmd, shell=True)
     urls = {}
