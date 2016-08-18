@@ -38,7 +38,7 @@ def is_existing_file(file, job=None):
     if not issubclass(file_type, IGangaFile):
         raise ValueError('file must be a Ganga file object!')
 
-    if issubclass(file_type, GangaDirac.Lib.Files.DiracFile):
+    if issubclass(file_type, GangaDirac.Lib.Files.DiracFile.DiracFile):
         ok = bool(file.lfn)
     elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
         ok = bool(file.location())

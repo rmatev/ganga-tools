@@ -68,10 +68,12 @@ def dirac_get_access_urls(lfns):
     if not lfns:
         return {}
 
-    from GangaDirac.Lib.Utilities.DiracUtilities import execute
     opts = '--Protocol xroot,root'
     cmd = 'dirac-dms-lfn-accessURL {} {}'.format(','.join(lfns), opts)
-    output = execute(cmd, shell=True)
+    # from GangaDirac.Lib.Utilities.DiracUtilities import execute
+    # output = execute(cmd, shell=True)
+    import subprocess
+    output = subprocess.check_output(['lb-run', 'LHCbDirac/latest'] + cmd.split())
     urls = {}
     for line in output.splitlines():
         items = [x.strip() for x in line.split(':', 1)]
@@ -95,7 +97,7 @@ def get_access_urls(files):
         if not issubclass(file_type, IGangaFile):
             raise ValueError('file must be a Ganga file object!')
 
-        if issubclass(file_type, GangaDirac.Lib.Files.DiracFile):
+        if issubclass(file_type, GangaDirac.Lib.Files.DiracFile.DiracFile):
             dirac_lfns.append(f.lfn)  # deal with this case separately below
         elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
             # TODO this is LHCb specific, but there is no generic easy way
@@ -109,7 +111,7 @@ def get_access_urls(files):
     if(len(dirac_lfns) > 0):
         dirac_urls_dict = dirac_get_access_urls(dirac_lfns)
         for i, (job, f) in enumerate(files):
-            if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile):
+            if issubclass(ganga_type(f), GangaDirac.Lib.Files.DiracFile.DiracFile):
                 try:
                     urls[i] = dirac_urls_dict[f.lfn]
                 except KeyError:
