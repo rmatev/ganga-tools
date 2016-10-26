@@ -1,5 +1,6 @@
 from Ganga.Utility.logging import getLogger, _set_log_level
 from Ganga.GPIDev.Adapters.IChecker import IChecker
+from Ganga.GPIDev.Schema import Schema, Version, SimpleItem
 
 logger = getLogger()
 
@@ -11,7 +12,8 @@ class LHCbBookkeepingChecker(IChecker):
     Compares the number of processed events (metadata) and the number of input events.
     """
     _schema = IChecker._schema.inherit_copy()
-    #_schema['checkMaster']._update({'defvalue': False})
+    _schema.datadict['maxAbsDiff'] = SimpleItem(defvalue=0, doc='Maximum absolute difference')
+    _schema.datadict['maxRelDiff'] = SimpleItem(defvalue=0.0, doc='Maximum relative difference')
     _category = 'postprocessor'
     _name = 'LHCbBookkeepingChecker'
     _exportmethods = ['check']
@@ -36,7 +38,19 @@ class LHCbBookkeepingChecker(IChecker):
             return self.failure
 
         if n_processed != n_expected:
-            logger.info('Number of processed events (%d) differs from the expected number of input events (%d).'%(n_processed,n_expected))
+            diff = n_expected - n_processed
+            reldiff = float(diff) / float(n_expected)
+            logger.info('Job {}: Number of processed events ({}) differs from the '
+                        'expected number of input events ({}) by {}'
+                        .format(job.fqid, n_processed, n_expected, diff))
+            if self.maxAbsDiff >= 0 and diff > self.maxAbsDiff:
+                logger.warning('Job {}: Absolute difference ({}) is more than the maximum allowed ({})'
+                               .format(job.fqid, diff, self.maxAbsDiff))
+            elif self.maxRelDiff >= 0.0 and reldiff > self.maxRelDiff:
+                logger.warning('Job {}: Relative difference ({}) is more than the maximum allowed ({})'
+                               .format(job.fqid, reldiff, self.maxRelDiff))
+            else:
+                return self.success
             return self.failure
 
         return self.success
