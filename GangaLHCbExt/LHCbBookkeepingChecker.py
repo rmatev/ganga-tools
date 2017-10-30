@@ -25,10 +25,10 @@ class LHCbBookkeepingChecker(IChecker):
         bkmd = job.inputdata.bkMetadata()
         t.setLevel(old)
 
-        if not bkmd['OK'] or bkmd['Value']['Failed']:
+        if bkmd['Failed']:
             logger.warning('Could not get the bookeeping metadata.')
             return self.failure
-        n_expected = sum(bkMetadataStat(v) for v in bkmd['Value']['Successful'].values())
+        n_expected = sum(bkMetadataStat(v) for v in bkmd['Successful'].values())
 
         try:
             n_processed = job.metadata['events']['input']
