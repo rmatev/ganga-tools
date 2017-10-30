@@ -41,8 +41,14 @@ class LHCbCompleteChecker(IChecker):
         except KeyError:
             raise PostProcessException("The metadata value 'xmlskippedfiles' was not defined")
 
-        ok = (nfullfiles == len(job.inputdata)) and (nskipped == 0)
+        ninputfiles = len(job.inputdata)
+        try:
+            ninputfiles = job.splitter.maxFiles or ninputfiles
+        except AttributeError:
+            pass
+
+        ok = (nfullfiles == ninputfiles) and (nskipped == 0)
         if not ok:
-            logger.info('LHCbCompleteChecker has failed job {} (len(inputdata)={}, nfullfiles={}, nskipped={})'.format(
-                job.fqid, len(job.inputdata), nfullfiles, nskipped))
+            logger.info('LHCbCompleteChecker has failed job {} (expected={}, nfullfiles={}, nskipped={})'.format(
+                job.fqid, ninputfiles, nfullfiles, nskipped))
         return ok
