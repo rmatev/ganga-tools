@@ -47,7 +47,10 @@ class LHCbCompleteChecker(IChecker):
         except AttributeError:
             pass
 
-        ok = (nfullfiles == ninputfiles) and (nskipped == 0)
+        if nskipped > 0:
+            logger.info('Job {} skipped {} files, likey unreachable PFNs'.format(job.fqid, nskipped))
+
+        ok = nfullfiles == ninputfiles
         if not ok:
             logger.info('LHCbCompleteChecker has failed job {} (expected={}, nfullfiles={}, nskipped={})'.format(
                 job.fqid, ninputfiles, nfullfiles, nskipped))
