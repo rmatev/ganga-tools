@@ -73,7 +73,7 @@ def dirac_get_access_urls(lfns):
     # from GangaDirac.Lib.Utilities.DiracUtilities import execute
     # output = execute(cmd, shell=True)
     import subprocess
-    output = subprocess.check_output(['lb-run', 'LHCbDirac/latest'] + cmd.split())
+    output = subprocess.check_output(['lb-run', 'LHCbDirac'] + cmd.split())
     urls = {}
     for line in output.splitlines():
         items = [x.strip() for x in line.split(':', 1)]
