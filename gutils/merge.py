@@ -1,10 +1,7 @@
 import os
-import shutil
-import tempfile
-from collections import defaultdict
 import Ganga
 from utils import subjobs, outputfiles
-from download import download_files, get_access_urls
+from download import download_temp, get_access_urls
 from root_utils import get_tree_enties
 
 logger = Ganga.Utility.logging.getLogger('gutils.merge')
@@ -25,11 +22,9 @@ def _merge_root(inputs, output):
     assert get_tree_enties(inputs) == get_tree_enties(output)
 
 
-def _prepare_merge(jobs, name, path, overwrite=False, partial=False):
+def _merged_path(jobs, name, path, overwrite=False, partial=False):
     if any(x in name for x in ['*', '?', '[', ']']):
         raise ValueError('Wildcard characters in name not supported.')
-
-    files = outputfiles(jobs, name, one_per_job=True)
 
     jobnames = set(j.name for j in jobs)
     if len(jobnames) != 1:
@@ -44,25 +39,19 @@ def _prepare_merge(jobs, name, path, overwrite=False, partial=False):
         if not overwrite:
             raise ValueError('File "{}" already exists.'.format(path))
 
-    return (files, path)
+    return path
 
 
-def download_merge(jobs, name, path, parallel=True, keep_temp=False, **kwargs):
-    files, path = _prepare_merge(jobs, name, path, **kwargs)
-
-    tempdir = tempfile.mkdtemp(prefix='merge-{}-'.format(name))
-    filenames = download_files(files, tempdir, parallel)
-    if not filenames:
-        raise RuntimeError('No files found for given job(s). Check the name pattern.')
-    _merge_root(filenames, path)
-
-    if not keep_temp:
-        shutil.rmtree(tempdir)
+def download_merge(jobs, name, path, parallel=True, keep_temp=False, overwrite=False, partial=False):
+    path = _merged_path(jobs, name, path, overwrite=overwrite, partial=partial)
+    with download_temp(jobs, name, parallel=parallel, keep_temp=keep_temp) as filenames:
+        _merge_root(filenames, path)
     return path
 
 
 def direct_merge(jobs, name, path, **kwargs):
-    files, path = _prepare_merge(jobs, name, path, **kwargs)
+    path = _merged_path(jobs, name, path, **kwargs)
+    files = outputfiles(jobs, name, one_per_job=True)
 
     if not files:
         raise RuntimeError('No files found for given job(s). Check the name pattern.')

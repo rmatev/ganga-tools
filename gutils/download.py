@@ -1,7 +1,7 @@
 import os
+import shutil
 import time
 import tempfile
-from collections import defaultdict
 import Ganga
 import GangaDirac
 from Ganga.GPIDev.Base.Proxy import GPIProxyObject
@@ -42,7 +42,7 @@ def download_files(files, path, parallel=True, block=True):
     for job, file in files:
         root, ext = os.path.splitext(file.namePattern)
         fn = os.path.join(path, '{}-{}{}'.format(root, job.fqid, ext))
-        filenames.append(fn)
+        filenames.append((file, fn))
         if parallel:
             Ganga.GPI.queues.add(get_file, args=(file, fn))
         else:
@@ -52,14 +52,36 @@ def download_files(files, path, parallel=True, block=True):
         while Ganga.GPI.queues.totalNumUserThreads():
             time.sleep(2)
 
-    return filenames
+    downloaded = []
+    for src, fn in filenames:
+        if os.path.isfile(fn):
+            downloaded.append(fn)
+        else:
+            logger.warning('File {!r} could not be downloaded'.format(src))
+    # if len(downloaded) < len(filenames):
+    #     raise RuntimeError('Not all files could be downloaded')
+    return downloaded
 
 
-def download(jobs, name, path, parallel=True, ignore_missing=True):
+def download(jobs, name, path, ignore_missing=True, **kwargs):
     if any(x in name for x in ['*', '?', '[', ']']):
         raise ValueError('Wildcard characters in name not supported.')
     files = outputfiles(jobs, name, one_per_job=True, ignore_missing=ignore_missing)
-    download_files(files, path, parallel)
+    return download_files(files, path, **kwargs)
+
+
+def download_temp(jobs, name, ignore_missing=True, keep_temp=False, **kwargs):
+    tempdir = tempfile.mkdtemp(prefix='download_temp-{}-'.format(name))
+    filenames = download(jobs, name, tempdir, ignore_missing=ignore_missing, **kwargs)
+    if not filenames:
+        raise RuntimeError('No files found for given job(s). Check the name pattern.')
+    class TempFileList(list):
+        def __enter__(self):
+            return self
+        def __exit__(self, type, value, traceback):
+            if not keep_temp:
+                shutil.rmtree(tempdir)
+    return TempFileList(filenames)
 
 
 def dirac_get_access_urls(lfns):
