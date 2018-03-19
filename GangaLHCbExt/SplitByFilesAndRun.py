@@ -6,15 +6,28 @@ from GangaGaudi.Lib.Splitters.GaudiInputDataSplitter import GaudiInputDataSplitt
 from DiracRunSplitter import DiracRunSplitter as DiracSplitter  # change!
 #from SplitterUtils import DiracSplitter
 from GangaLHCb.Lib.Files import LogicalFile
-from Ganga.GPIDev.Adapters.ISplitter import SplittingError
-from Ganga.GPIDev.Schema import *
 from GangaLHCb.Lib.LHCbDataset.LHCbDataset import LHCbDataset
-from Ganga.Utility.Config import getConfig
-from Ganga.Utility.files import expandfilename
-from Ganga.GPIDev.Base.Proxy import stripProxy
-import Ganga.Utility.logging
-from Ganga.GPIDev.Lib.Job import Job
-logger = Ganga.Utility.logging.getLogger()
+
+try: # for Ganga >= v7.0.0
+    from GangaCore.GPIDev.Adapters.ISplitter import SplittingError
+    from GangaCore.GPIDev.Schema import *
+    from GangaCore.Utility.Config import getConfig
+    from GangaCore.Utility.files import expandfilename
+    from GangaCore.GPIDev.Base.Proxy import stripProxy
+    import GangaCore.Utility.logging
+    from GangaCore.GPIDev.Lib.Job import Job
+    logger = GangaCore.Utility.logging.getLogger()
+except ImportError:
+    from Ganga.GPIDev.Adapters.ISplitter import SplittingError
+    from Ganga.GPIDev.Schema import *
+    from Ganga.Utility.Config import getConfig
+    from Ganga.Utility.files import expandfilename
+    from Ganga.GPIDev.Base.Proxy import stripProxy
+    import Ganga.Utility.logging
+    from Ganga.GPIDev.Lib.Job import Job
+    logger = Ganga.Utility.logging.getLogger() # for Ganga < v7.0.0
+
+
 import os
 import copy
 import pickle
@@ -36,7 +49,7 @@ class SplitByFilesAndRun(GaudiInputDataSplitter):  # change!
                                                    'in the LFC. This option is only used if' \
                                                    'jobs backend is Dirac')
 
-        
+
 
 
 
@@ -64,7 +77,7 @@ class SplitByFilesAndRun(GaudiInputDataSplitter):  # change!
         return j
 
 
-    # returns splitter generator 
+    # returns splitter generator
     def _splitter(self, job, inputdata):
         indata = job.inputdata
         if not job.inputdata:
@@ -80,7 +93,7 @@ class SplitByFilesAndRun(GaudiInputDataSplitter):  # change!
                 f.close()
             else:
                 logger.error('Cannot split if no inputdata given!')
-                raise SplittingError('job.inputdata is None and no inputdata found in optsfile')         
+                raise SplittingError('job.inputdata is None and no inputdata found in optsfile')
 
 
         self.depth             = indata.depth

@@ -1,11 +1,15 @@
 import os
 import argparse
 import tempfile
-import Ganga
 from gutils.utils import master_id, smart_jobs_select
 from gutils.merge import direct_merge, download_merge
 
-logger = Ganga.Utility.logging.getLogger('gmerge')
+try: # for Ganga >= v7.0.0
+    import GangaCore
+    logger = GangaCore.Utility.logging.getLogger('gmerge')
+except ImportError:
+    import Ganga
+    logger = Ganga.Utility.logging.getLogger('gmerge')
 
 parser = argparse.ArgumentParser(description='Directly merge outputfiles')
 parser.add_argument('jobs', nargs='+', help='Job IDs. One output per argument. Use comma separated values for merge accross (sub)jobs.')

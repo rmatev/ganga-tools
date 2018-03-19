@@ -1,16 +1,23 @@
 import os
 import re
 import logging
-import Ganga
 import GangaDirac
-from Ganga.GPIDev.Base.Proxy import GPIProxyObject
-from Ganga.GPIDev.Lib.Job.Job import Job
-try:
-    from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
-except ImportError:
-    from Ganga.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
+try: # for Ganga >= v7.0.0
+    import GangaCore
+    from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
+    from GangaCore.GPIDev.Lib.Job.Job import Job
+    from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
+    logger = GangaCore.Utility.logging.getLogger('gutils.utils')
+except ImportError: 
+    import Ganga
+    from Ganga.GPIDev.Base.Proxy import GPIProxyObject
+    from Ganga.GPIDev.Lib.Job.Job import Job
+    try:
+        from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
+    except ImportError:
+        from Ganga.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
+    logger = Ganga.Utility.logging.getLogger('gutils.utils')
 
-logger = Ganga.Utility.logging.getLogger('gutils.utils')
 
 
 def ganga_type(x):
