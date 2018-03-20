@@ -1,8 +1,11 @@
 _externalPackages = {
    }
 
+try: # for Ganga >= v7.0.0
+    from GangaCore.Utility.Setup import PackageSetup
+except ImportError:
+    from Ganga.Utility.Setup import PackageSetup # for Ganga < v7.0.0
 
-from Ganga.Utility.Setup import PackageSetup
 # The setup object
 setup = PackageSetup(_externalPackages)
 

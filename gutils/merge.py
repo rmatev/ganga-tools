@@ -1,11 +1,14 @@
 import os
-import Ganga
+try: # for Ganga >= v7.0.0
+    import GangaCore
+    logger = GangaCore.Utility.logging.getLogger('gutils.merge')
+except ImportError:
+    import Ganga
+    logger = Ganga.Utility.logging.getLogger('gutils.merge')
+
 from utils import subjobs, outputfiles
 from download import download_temp, get_access_urls
 from root_utils import get_tree_enties
-
-logger = Ganga.Utility.logging.getLogger('gutils.merge')
-
 
 def _merge_root(inputs, output):
     config = Ganga.GPI.config
