@@ -5,17 +5,14 @@ import tempfile
 import GangaDirac
 try: # for Ganga >= v7.0.0
     import GangaCore
-    from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
-    from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile
-    logger = GangaCore.Utility.logging.getLogger('gutils.download')
-except ImportError: 
-    import Ganga
-    from Ganga.GPIDev.Base.Proxy import GPIProxyObject
-    try:
-        from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
-    except ImportError:
-        from Ganga.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
-    logger = Ganga.Utility.logging.getLogger('gutils.download')
+except ImportError:
+    import Ganga as GangaCore
+from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
+try:
+    from GangaCore.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
+except ImportError:
+    from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
+logger = GangaCore.Utility.logging.getLogger('gutils.download')
 
 from utils import ganga_type, outputfiles
 
@@ -52,12 +49,12 @@ def download_files(files, path, parallel=True, block=True):
         fn = os.path.join(path, '{}-{}{}'.format(root, job.fqid, ext))
         filenames.append((file, fn))
         if parallel:
-            Ganga.GPI.queues.add(get_file, args=(file, fn))
+            GangaCore.GPI.queues.add(get_file, args=(file, fn))
         else:
             get_file(file, fn)
 
     if parallel and block:
-        while Ganga.GPI.queues.totalNumUserThreads():
+        while GangaCore.GPI.queues.totalNumUserThreads():
             time.sleep(2)
 
     downloaded = []
@@ -129,10 +126,10 @@ def get_access_urls(files):
 
         if issubclass(file_type, GangaDirac.Lib.Files.DiracFile.DiracFile):
             dirac_lfns.append(f.lfn)  # deal with this case separately below
-        elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
+        elif issubclass(file_type, GangaCore.GPIDev.Lib.File.MassStorageFile):
             # TODO this is LHCb specific, but there is no generic easy way
             urls[i] = 'root://eoslhcb.cern.ch/' + f.location()[0]
-        elif issubclass(file_type, Ganga.GPIDev.Lib.File.LocalFile):
+        elif issubclass(file_type, GangaCore.GPIDev.Lib.File.LocalFile):
             urls[i] = os.path.join(job.outputdir, f.namePattern)
         else:
             raise NotImplementedError('get_access_url() does not yet implement {}'.format(repr(f)))

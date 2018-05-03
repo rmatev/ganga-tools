@@ -9,7 +9,7 @@ from GangaLHCb.Lib.Files import LogicalFile
 from GangaLHCb.Lib.LHCbDataset.LHCbDataset import LHCbDataset
 
 try: # for Ganga >= v7.0.0
-    from GangaCore.GPIDev.Adapters.ISplitter import SplittingError
+    from GangaCore.Core.exceptions import SplitterError as SplittingError
     from GangaCore.GPIDev.Schema import *
     from GangaCore.Utility.Config import getConfig
     from GangaCore.Utility.files import expandfilename

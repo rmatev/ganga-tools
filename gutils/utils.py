@@ -4,19 +4,15 @@ import logging
 import GangaDirac
 try: # for Ganga >= v7.0.0
     import GangaCore
-    from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
-    from GangaCore.GPIDev.Lib.Job.Job import Job
+except ImportError:
+    import Ganga as GangaCore
+from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
+from GangaCore.GPIDev.Lib.Job.Job import Job
+try:
+    from GangaCore.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
+except ImportError:
     from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
-    logger = GangaCore.Utility.logging.getLogger('gutils.utils')
-except ImportError: 
-    import Ganga
-    from Ganga.GPIDev.Base.Proxy import GPIProxyObject
-    from Ganga.GPIDev.Lib.Job.Job import Job
-    try:
-        from Ganga.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
-    except ImportError:
-        from Ganga.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
-    logger = Ganga.Utility.logging.getLogger('gutils.utils')
+logger = GangaCore.Utility.logging.getLogger('gutils.utils')
 
 
 
@@ -47,9 +43,9 @@ def is_existing_file(file, job=None):
 
     if issubclass(file_type, GangaDirac.Lib.Files.DiracFile.DiracFile):
         ok = bool(file.lfn)
-    elif issubclass(file_type, Ganga.GPIDev.Lib.File.MassStorageFile):
+    elif issubclass(file_type, GangaCore.GPIDev.Lib.File.MassStorageFile):
         ok = bool(file.location())
-    elif issubclass(file_type, Ganga.GPIDev.Lib.File.LocalFile):
+    elif issubclass(file_type, GangaCore.GPIDev.Lib.File.LocalFile):
         # Ganga 6.0.44 does not set localDir of LocalFile thus no way
         # to check if file object is a placeholder or refers to a real file
         # TODO file a bug report
@@ -102,11 +98,11 @@ def smart_jobs_select(specs):
         if not m:
             raise ValueError("Unsupported spec '{}'".format(spec))
         if m.group('master'):
-            sjobs = list(subjobs(Ganga.GPI.jobs(m.group('master'))))
+            sjobs = list(subjobs(GangaCore.GPI.jobs(m.group('master'))))
         elif m.group('subjob'):
-            sjobs = [Ganga.GPI.jobs(m.group('subjob'))]
+            sjobs = [GangaCore.GPI.jobs(m.group('subjob'))]
         elif m.group('range1'):
-            sjobs = list(subjobs(Ganga.GPI.jobs.select(int(m.group('range1')), int(m.group('range2')))))
+            sjobs = list(subjobs(GangaCore.GPI.jobs.select(int(m.group('range1')), int(m.group('range2')))))
         else:
             assert False
         if not m.group('remove'):
@@ -137,7 +133,7 @@ def recheck(jobs, only_failed=True):
         elif job.status == 'completed':
             # This is a temporary hack for ganga v600r44
             # TODO remove this when the proposed fix from GANGA-1984 is released
-            file_checkers = [p for p in job.postprocessors if isinstance(p._impl, Ganga.Lib.Checkers.Checker.FileChecker)]
+            file_checkers = [p for p in job.postprocessors if isinstance(p._impl, GangaCore.Lib.Checkers.Checker.FileChecker)]
             if not all(p._impl.result for p in file_checkers):
                 for p in file_checkers: p._impl.result = True
                 logger.info('Re-checking job {}'.format(job.fqid))

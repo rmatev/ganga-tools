@@ -1,23 +1,23 @@
 import os
 try: # for Ganga >= v7.0.0
     import GangaCore
-    logger = GangaCore.Utility.logging.getLogger('gutils.merge')
 except ImportError:
-    import Ganga
-    logger = Ganga.Utility.logging.getLogger('gutils.merge')
+    import Ganga as GangaCore
+
+logger = GangaCore.Utility.logging.getLogger('gutils.merge')
 
 from utils import subjobs, outputfiles
 from download import download_temp, get_access_urls
 from root_utils import get_tree_enties
 
 def _merge_root(inputs, output):
-    config = Ganga.GPI.config
+    config = GangaCore.GPI.config
     old_ver = config['ROOT']['version']
     config['ROOT']['version'] = '6.02.05'  # corresponds to DaVinci v36r5
 
     # rootMerger = RootMerger(args='-f6')
     # -O gives the best reading performance:
-    rootMerger = Ganga.GPI.RootMerger(args='-O')
+    rootMerger = GangaCore.GPI.RootMerger(args='-O')
     rootMerger._impl.mergefiles(inputs, output)
 
     config['ROOT']['version'] = old_ver

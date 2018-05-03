@@ -1,6 +1,6 @@
 from collections import defaultdict
 try: # for Ganga >= v7.0.0
-    from GangaCore.GPIDev.Adapters.ISplitter import SplittingError
+    from GangaCore.Core.exceptions import SplitterError as SplittingError
     from GangaCore.Utility.logging import getLogger
 except ImportError:
     from Ganga.GPIDev.Adapters.ISplitter import SplittingError
