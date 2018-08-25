@@ -10,17 +10,17 @@ from utils import subjobs, outputfiles
 from download import download_temp, get_access_urls
 from root_utils import get_tree_enties
 
+def _getrootprefix_patch(rootsys=None):
+    return 0, 'lb-run ROOT '
+
 def _merge_root(inputs, output):
     config = GangaCore.GPI.config
-    old_ver = config['ROOT']['version']
-    config['ROOT']['version'] = '6.02.05'  # corresponds to DaVinci v36r5
+    GangaCore.Utility.root.getrootprefix = _getrootprefix_patch
 
     # rootMerger = RootMerger(args='-f6')
     # -O gives the best reading performance:
     rootMerger = GangaCore.GPI.RootMerger(args='-O')
     rootMerger._impl.mergefiles(inputs, output)
-
-    config['ROOT']['version'] = old_ver
 
     assert get_tree_enties(inputs) == get_tree_enties(output)
 
