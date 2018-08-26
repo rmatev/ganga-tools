@@ -1,6 +1,8 @@
 import os
 import re
+import functools
 import logging
+
 import GangaDirac
 try: # for Ganga >= v7.0.0
     import GangaCore
@@ -13,7 +15,6 @@ try:
 except ImportError:
     from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
 logger = GangaCore.Utility.logging.getLogger('gutils.utils')
-
 
 
 def ganga_type(x):
@@ -148,9 +149,11 @@ def resubmit(jobs, only_failed=True):
         if not only_failed or job.status == 'failed':
             job.resubmit()
 
+
 def runtimes(jobs):
     """Return list of runtimes of finished jobs (in seconds)"""
     return [job.time.runtime().total_seconds() for job in subjobs(jobs) if job.status == 'completed']
+
 
 def status(j):
     """Return an overview of how many subjobs are in what status"""
@@ -158,3 +161,16 @@ def status(j):
         l = len(j.subjobs.select(status=stat))
         if l > 0:
             print stat+":", l
+
+
+def memoize(obj):
+    """Simple memoization decorator."""
+    cache = obj.cache = {}
+
+    @functools.wraps(obj)
+    def memoizer(*args, **kwargs):
+        key = str(args) + str(kwargs)
+        if key not in cache:
+            cache[key] = obj(*args, **kwargs)
+        return cache[key]
+    return memoizer
