@@ -1,4 +1,6 @@
 import os
+import shutil
+
 try: # for Ganga >= v7.0.0
     import GangaCore
 except ImportError:
@@ -10,8 +12,10 @@ from utils import subjobs, outputfiles
 from download import download_temp, get_access_urls
 from root_utils import get_tree_enties
 
+
 def _getrootprefix_patch(rootsys=None):
     return 0, 'lb-run ROOT '
+
 
 def _merge_root(inputs, output):
     config = GangaCore.GPI.config
@@ -23,6 +27,28 @@ def _merge_root(inputs, output):
     rootMerger._impl.mergefiles(inputs, output)
 
     assert get_tree_enties(inputs) == get_tree_enties(output)
+
+
+def _merge_mdf(inputs, output):
+    if any(x.startswith('root://') for x in inputs):
+        raise NotImplementedError('Direct merging of MDF files not implemented.')
+    with open(output, 'wb') as fout:
+        for inp in inputs:
+            with open(inp, 'rb') as fin:
+                shutil.copyfileobj(fin, fout)
+
+
+def _merge(inputs, output):
+    ext = os.path.splitext(output)[1]
+    if not all(os.path.splitext(x)[1] == ext for x in inputs):
+        raise ValueError("Incompatible extensions of inputs ({}) and output "
+                         "({}).".format(inputs, output))
+    if ext == '.root':
+        _merge_root(inputs, output)
+    elif ext == '.mdf' or ext == '.raw':
+        _merge_mdf(inputs, output)
+    else:
+        raise ValueError("Do not know how to merge {} files.".format(ext))
 
 
 def _merged_path(jobs, name, path, overwrite=False, partial=False):
@@ -48,7 +74,7 @@ def _merged_path(jobs, name, path, overwrite=False, partial=False):
 def download_merge(jobs, name, path, parallel=True, keep_temp=False, overwrite=False, partial=False):
     path = _merged_path(jobs, name, path, overwrite=overwrite, partial=partial)
     with download_temp(jobs, name, parallel=parallel, keep_temp=keep_temp) as filenames:
-        _merge_root(filenames, path)
+        _merge(filenames, path)
     return path
 
 
@@ -59,5 +85,5 @@ def direct_merge(jobs, name, path, **kwargs):
     if not files:
         raise RuntimeError('No files found for given job(s). Check the name pattern.')
     urls = get_access_urls(files)
-    _merge_root(urls, path)
+    _merge(urls, path)
     return path
