@@ -26,7 +26,10 @@ def _merge_root(inputs, output):
     rootMerger = GangaCore.GPI.RootMerger(args='-O')
     rootMerger._impl.mergefiles(inputs, output)
 
-    assert get_tree_enties(inputs) == get_tree_enties(output)
+    n_in, n_out = get_tree_enties(inputs), get_tree_enties(output)
+    if n_in != n_out:
+        logger.error("Got {} input entries but merged file contains {}!"
+                     .format(n_in, n_out))
 
 
 def _merge_mdf(inputs, output):
