@@ -4,16 +4,10 @@ import functools
 import logging
 
 import GangaDirac
-try: # for Ganga >= v7.0.0
-    import GangaCore
-except ImportError:
-    import Ganga as GangaCore
+import GangaCore
 from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
 from GangaCore.GPIDev.Lib.Job.Job import Job
-try:
-    from GangaCore.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
-except ImportError:
-    from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
+from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile
 logger = GangaCore.Utility.logging.getLogger('gutils.utils')
 
 
@@ -116,31 +110,17 @@ def smart_jobs_select(specs):
 
 def master_id(job):
     """Return the master id of a (sub)job."""
-    # return job.master.id if job.master else job.id
-    # This is broken in Ganga 6.1.14, a work-around is needed.
-    # See https://github.com/ganga-devs/ganga/pull/108
-    return job.fqid.split('.')[0]
+    return job.master.id if job.master else job.id
 
 
 def recheck(jobs, only_failed=True):
     """Re-check (only failed) subjobs"""
+    # TODO this way of rerunning checkers may not work in the future
     for job in subjobs(jobs):
         if job.status == 'failed' or (not only_failed and job.status == 'completed'):
-            # TODO this way of rerunning checkers may not work in the future
-            # see GANGA-1984
             logger.info('Re-checking job {}'.format(job.fqid))
             if job.status == 'completed': job.force_status('failed')
             job.force_status('completed')
-        elif job.status == 'completed':
-            # This is a temporary hack for ganga v600r44
-            # TODO remove this when the proposed fix from GANGA-1984 is released
-            file_checkers = [p for p in job.postprocessors if isinstance(p._impl, GangaCore.Lib.Checkers.Checker.FileChecker)]
-            if not all(p._impl.result for p in file_checkers):
-                for p in file_checkers: p._impl.result = True
-                logger.info('Re-checking job {}'.format(job.fqid))
-                logger.warning('This is a hack necessary for ganga v600r44')
-                job.force_status('failed')
-                job.force_status('completed')
 
 
 def resubmit(jobs, only_failed=True):

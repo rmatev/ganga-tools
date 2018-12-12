@@ -1,11 +1,6 @@
-try:
-    from GangaCore.Utility.logging import getLogger, _set_log_level
-    from GangaCore.GPIDev.Adapters.IChecker import IChecker
-    from GangaCore.GPIDev.Schema import Schema, Version, SimpleItem
-except ImportError: # for Ganga >= v7.0.0
-    from Ganga.Utility.logging import getLogger, _set_log_level
-    from Ganga.GPIDev.Adapters.IChecker import IChecker
-    from Ganga.GPIDev.Schema import Schema, Version, SimpleItem
+from GangaCore.Utility.logging import getLogger, _set_log_level
+from GangaCore.GPIDev.Adapters.IChecker import IChecker
+from GangaCore.GPIDev.Schema import Schema, Version, SimpleItem
 
 logger = getLogger()
 
@@ -24,11 +19,11 @@ class LHCbBookkeepingChecker(IChecker):
     _exportmethods = ['check']
 
     def check(self, job):
-        t = getLogger('Ganga.GangaLHCb.Lib.LHCbDataset')
-        old = t.level
-        _set_log_level(t, 'WARNING')
+        from GangaLHCb.Lib.LHCbDataset.LHCbDataset import logger as ds_logger
+        old = ds_logger.level
+        _set_log_level(ds_logger, 'WARNING')
         bkmd = job.inputdata.bkMetadata()
-        t.setLevel(old)
+        ds_logger.setLevel(old)
 
         if bkmd['Failed']:
             logger.warning('Could not get the bookeeping metadata.')

@@ -3,20 +3,12 @@ import shutil
 import time
 import tempfile
 import GangaDirac
-try: # for Ganga >= v7.0.0
-    import GangaCore
-except ImportError:
-    import Ganga as GangaCore
+import GangaCore
 from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
-try:
-    from GangaCore.GPIDev.Lib.File.IGangaFile import IGangaFile  # for Ganga <= v6.1.14
-except ImportError:
-    from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile  # for Ganga >= v6.1.16
-logger = GangaCore.Utility.logging.getLogger('gutils.download')
-
+from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile
 from utils import ganga_type, outputfiles
 
-
+logger = GangaCore.Utility.logging.getLogger('gutils.download')
 
 
 def get_file(file, path):

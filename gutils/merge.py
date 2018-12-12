@@ -1,10 +1,6 @@
 import os
 import shutil
-
-try: # for Ganga >= v7.0.0
-    import GangaCore
-except ImportError:
-    import Ganga as GangaCore
+import GangaCore
 
 logger = GangaCore.Utility.logging.getLogger('gutils.merge')
 

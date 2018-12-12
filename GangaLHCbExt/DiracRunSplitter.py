@@ -1,14 +1,11 @@
 from collections import defaultdict
-try: # for Ganga >= v7.0.0
-    from GangaCore.Core.exceptions import SplitterError as SplittingError
-    from GangaCore.Utility.logging import getLogger
-except ImportError:
-    from Ganga.GPIDev.Adapters.ISplitter import SplittingError
-    from Ganga.Utility.logging import getLogger
+from GangaCore.Core.exceptions import SplitterError as SplittingError
+from GangaCore.Utility.logging import getLogger
 from GangaDirac.Lib.Backends.DiracUtils import result_ok
 from GangaDirac.Lib.Splitters.SplitterUtils import DiracSplitter
 
 logger = getLogger()
+
 
 def DiracRunSplitter(inputs, filesPerJob, maxFiles, ignoremissing):
     """

@@ -1,13 +1,11 @@
 import os
 import argparse
 import tempfile
+import GangaCore
 from gutils.utils import smart_jobs_select
 from gutils.download import download
-try: # for Ganga >= v7.0.0
-    import GangaCore #to possibly raise the exception
-    logger = GangaCore.Utility.logging.getLogger('gdownload')
-except ImportError:
-    logger = Ganga.Utility.logging.getLogger('gdownload')
+
+logger = GangaCore.Utility.logging.getLogger('gdownload')
 
 
 parser = argparse.ArgumentParser(description='Download outputfiles')
