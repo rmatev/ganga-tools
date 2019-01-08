@@ -4,6 +4,8 @@ import re
 import GangaCore
 from GangaCore.GPI import (
     diracAPI, BKQuery, LHCbDataset, MassStorageFile, DiracFile)
+from GangaDirac.Lib.Utilities.DiracUtilities import GangaDiracError
+
 
 # Disable the info message from LHCbDataset.bkMetadata()
 GangaCore.GPI.config['Logging']['GangaLHCb.Lib.LHCbDataset'] = 'WARNING'
@@ -27,14 +29,15 @@ def chunks(l, n):
 
 def bkAPI(cmd, timeout=120, tries=3):
     for i in range(tries):
-        result = diracAPI('output(dirac.bk.'+cmd+')', timeout=timeout)
-        if result != 'Command timed out!':
-            break
-    if result == 'Command timed out!':
-        raise RuntimeError('Command timed out {} times! Increase timeout.'.format(tries))
-    if isinstance(result, basestring) or not result.get('OK', False):
-        raise RuntimeError('Command failed: ', result)
-    return result['Value']
+        try:
+            result = diracAPI(
+                'from LHCbDIRAC.BookkeepingSystem.Client.BookkeepingClient import BookkeepingClient; '
+                'output(BookkeepingClient().{})'.format(cmd), timeout=timeout)
+            return result
+        except GangaDiracError as e:
+            if not e.message != 'DIRAC command timed out':
+                raise
+    raise RuntimeError('Command timed out {} times! Increase timeout.'.format(tries))
 
 
 def bkMetadata(dataset):
