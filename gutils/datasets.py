@@ -94,6 +94,8 @@ def get_raw_dataset_fill(fill, streams, destinations=None, runtypes=None):
                    for s in runinfo['Statistics'])
 
     runs = sorted(bkAPI('getRunsForFill({})'.format(fill)))
+    if not runs:
+        return None
     if destinations or runtypes:
         runinfos = _getRunInformation({
             "RunNumber": runs, "Fields": ["ConfigVersion"], "Statistics": ["EVENTTYPEID"]})
