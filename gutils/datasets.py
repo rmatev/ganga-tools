@@ -89,17 +89,24 @@ def get_raw_dataset_runs(runs, streams, warn=True):
 
 
 def get_raw_dataset_fill(fill, streams, destinations=None, runtypes=None):
+    def dest(runinfo):
+        return set('OFFLINE' if s['EVENTTYPEID'] % 2 == 0 else 'CASTOR'
+                   for s in runinfo['Statistics'])
+
     runs = sorted(bkAPI('getRunsForFill({})'.format(fill)))
+    if destinations or runtypes:
+        runinfos = _getRunInformation({
+            "RunNumber": runs, "Fields": ["ConfigVersion"], "Statistics": ["EVENTTYPEID"]})
     if destinations:
-        raise NotImplementedError('destinations filter not implemented')
-        # runs = [run for run in runs if rundb_run_info(run)['destination'] in destinations]
+        destinations = set(map(str.upper, destinations))
+        runs = [run for run in runs if dest(runinfos[run]) & destinations]
     if runtypes:
         runtypes = map(str.upper, runtypes)
-        runinfos = _getRunInformation({"RunNumber": runs})
         runs = [run for run in runs if runinfos[run]['ConfigVersion'].upper() in runtypes]
     if not runs:
         return None
-    return get_raw_dataset_runs(runs, streams, warn=('FULL' not in streams))
+    return get_raw_dataset_runs(runs, streams, warn=(('FULL' not in streams) and
+                                                     ('90000000' not in streams)))
 
 
 def get_raw_dataset(inp, streams, **kwargs):
