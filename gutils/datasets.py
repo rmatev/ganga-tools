@@ -88,20 +88,25 @@ def get_raw_dataset_runs(runs, streams, warn=True):
     return ds
 
 
-def get_raw_dataset_fill(fill, streams, destinations=None):
+def get_raw_dataset_fill(fill, streams, destinations=None, runtypes=None):
     runs = sorted(bkAPI('getRunsForFill({})'.format(fill)))
     if destinations:
-        runs = [run for run in runs if rundb_run_info(run)['destination'] in destinations]
+        raise NotImplementedError('destinations filter not implemented')
+        # runs = [run for run in runs if rundb_run_info(run)['destination'] in destinations]
+    if runtypes:
+        runtypes = map(str.upper, runtypes)
+        runinfos = _getRunInformation({"RunNumber": runs})
+        runs = [run for run in runs if runinfos[run]['ConfigVersion'].upper() in runtypes]
     if not runs:
         return None
     return get_raw_dataset_runs(runs, streams, warn=('FULL' not in streams))
 
 
-def get_raw_dataset(inp, streams, destinations=None):
+def get_raw_dataset(inp, streams, **kwargs):
     """Return a dataset (list of files) for a run/fill."""
     if inp.isdigit() and int(inp) > 50000:  # this is a run
-        return 'run', get_raw_dataset_runs([int(inp)], streams)
+        return 'run', get_raw_dataset_runs([int(inp)], streams, **kwargs)
     elif inp.isdigit() and int(inp) < 50000:  # this is a fill
-        return 'fill', get_raw_dataset_fill(int(inp), streams, destinations)
+        return 'fill', get_raw_dataset_fill(int(inp), streams, **kwargs)
     else:
         raise ValueError('Unknown input value!')
