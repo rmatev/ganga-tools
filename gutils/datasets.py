@@ -35,7 +35,7 @@ def bkAPI(cmd, timeout=120, tries=3):
                 'output(BookkeepingClient().{})'.format(cmd), timeout=timeout)
             return result
         except GangaDiracError as e:
-            if not e.message != 'DIRAC command timed out':
+            if e.message != 'DIRAC command timed out':
                 raise
     raise RuntimeError('Command timed out {} times! Increase timeout.'.format(tries))
 
