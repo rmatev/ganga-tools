@@ -1,5 +1,6 @@
 import os
 import shutil
+from urlparse import urlparse
 import GangaCore
 
 logger = GangaCore.Utility.logging.getLogger('gutils.merge')
@@ -37,9 +38,14 @@ def _merge_mdf(inputs, output):
                 shutil.copyfileobj(fin, fout)
 
 
+def _extension(x):
+    res = urlparse(x)
+    return os.path.splitext(res.path if res.scheme else x)[1]
+
+
 def _merge(inputs, output):
-    ext = os.path.splitext(output)[1]
-    if not all(os.path.splitext(x)[1] == ext for x in inputs):
+    ext = _extension(output)
+    if not all(_extension(x) == ext for x in inputs):
         raise ValueError("Incompatible extensions of inputs ({}) and output "
                          "({}).".format(inputs, output))
     if ext == '.root':
