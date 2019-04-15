@@ -130,6 +130,15 @@ def resubmit(jobs, only_failed=True):
             job.resubmit()
 
 
+def remove(jobs):
+    """Remove jobs and their data."""
+    for job in jobs:
+        if job.master:
+            raise ValueError('remove cannot take subjobs')
+        job.backend.removeOutputData()
+        job.remove()
+
+
 def runtimes(jobs):
     """Return list of runtimes of finished jobs (in seconds)"""
     return [job.time.runtime().total_seconds() for job in subjobs(jobs) if job.status == 'completed']
