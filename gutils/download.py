@@ -2,6 +2,8 @@ import os
 import shutil
 import time
 import tempfile
+import subprocess
+
 import GangaDirac
 import GangaCore
 from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
@@ -137,3 +139,7 @@ def get_access_urls(files):
                     logger.error('No available replica for LFN {} from job {}'.format(job.fqid))
                     raise RuntimeError('Cannot handle unaccessible files.')
     return urls
+
+
+def xrootd_read(url):
+    return subprocess.check_output(['xrdcp', '-s', url, '-'])
