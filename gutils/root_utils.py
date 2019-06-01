@@ -51,8 +51,12 @@ def _get_tree_entries(files, ignore_empty=False, ignore_missing=False):
 
 
 def get_tree_enties(files, ignore_empty=False, ignore_missing=False):
+    import os
+
     cmd = '_get_tree_entries({!r}, {!r}, {!r})'.format(files, ignore_empty, ignore_missing)
-    out = subprocess.check_output(['lb-run', 'ROOT', 'python', __file__, cmd])
+    env = os.environ.copy()
+    del env['TERM']  # fix for https://bugs.python.org/issue19884
+    out = subprocess.check_output(['lb-run', 'ROOT', 'python', __file__, cmd], env=env)
     return eval(out)
 
 
