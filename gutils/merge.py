@@ -45,9 +45,10 @@ def _extension(x):
 
 def _merge(inputs, output):
     ext = _extension(output)
-    if not all(_extension(x) == ext for x in inputs):
+    bad_ext = [x for x in inputs if _extension(x) != ext]
+    if bad_ext:
         raise ValueError("Incompatible extensions of inputs ({}) and output "
-                         "({}).".format(inputs, output))
+                         "({}).".format(bad_ext, ext))
     if ext == '.root':
         _merge_root(inputs, output)
     elif ext == '.mdf' or ext == '.raw':
