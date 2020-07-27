@@ -1,4 +1,8 @@
+import json
 import subprocess
+
+# FIXME lb-run ROOT does not seem to work these days
+ROOT_PREFIX = ['lb-run', 'Gaudi/latest']
 
 def _get_trees(x, dir_name=""):
     """Recursively get trees from x.
@@ -50,17 +54,17 @@ def _get_tree_entries(files, ignore_empty=False, ignore_missing=False):
     return dict(entries)
 
 
-def get_tree_enties(files, ignore_empty=False, ignore_missing=False):
+def get_tree_entries(files, ignore_empty=False, ignore_missing=False):
     import os
 
     cmd = '_get_tree_entries({!r}, {!r}, {!r})'.format(files, ignore_empty, ignore_missing)
     env = os.environ.copy()
     del env['TERM']  # fix for https://bugs.python.org/issue19884
-    out = subprocess.check_output(['lb-run', 'ROOT', 'python', __file__, cmd], env=env)
-    return eval(out)
+    out = subprocess.check_output(ROOT_PREFIX + ['python', __file__, cmd], env=env)
+    return json.loads(out)
 
 
 if __name__ == '__main__':
     import sys
     cmd = sys.argv[1]
-    print(repr(eval(cmd)))
+    print(json.dumps(eval(cmd)))

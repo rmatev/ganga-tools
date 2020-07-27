@@ -7,11 +7,11 @@ logger = GangaCore.Utility.logging.getLogger('gutils.merge')
 
 from .utils import subjobs, outputfiles
 from .download import download_temp, get_access_urls
-from .root_utils import get_tree_enties
+from .root_utils import get_tree_entries, ROOT_PREFIX
 
 
 def _getrootprefix_patch(rootsys=None):
-    return 0, 'lb-run ROOT '
+    return 0, ' '.join(ROOT_PREFIX) + ' '
 
 
 def _merge_root(inputs, output):
@@ -23,7 +23,7 @@ def _merge_root(inputs, output):
     rootMerger = GangaCore.GPI.RootMerger(args='-O')
     rootMerger._impl.mergefiles(inputs, output)
 
-    n_in, n_out = get_tree_enties(inputs), get_tree_enties(output)
+    n_in, n_out = get_tree_entries(inputs), get_tree_entries(output)
     if n_in != n_out:
         logger.error("Got {} input entries but merged file contains {}!"
                      .format(n_in, n_out))
