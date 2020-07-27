@@ -1,4 +1,4 @@
 def loadPlugins( config = {} ):
-    import SplitByFilesAndRun
-    import LHCbBookkeepingChecker
-    import LHCbCompleteChecker
+    from . import SplitByFilesAndRun
+    from . import LHCbBookkeepingChecker
+    from . import LHCbCompleteChecker

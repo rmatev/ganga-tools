@@ -3,7 +3,7 @@
 
 from GangaGaudi.Lib.Splitters.GaudiInputDataSplitter import GaudiInputDataSplitter
 #from GangaGaudi.Lib.Splitters.SplitterUtils import DatasetSplitter
-from DiracRunSplitter import DiracRunSplitter as DiracSplitter  # change!
+from .DiracRunSplitter import DiracRunSplitter as DiracSplitter  # change!
 #from SplitterUtils import DiracSplitter
 from GangaLHCb.Lib.Files import LogicalFile
 from GangaLHCb.Lib.LHCbDataset.LHCbDataset import LHCbDataset
