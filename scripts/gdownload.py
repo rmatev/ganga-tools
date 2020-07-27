@@ -22,7 +22,7 @@ for specs in args.jobs:
     jobs = smart_jobs_select(specs.split(','))
 
     unique_names = list(set(j.name for j in jobs))
-    print 'Downloading files for job(s)', unique_names
+    logger.info('Downloading files for job(s) {}'.format(unique_names))
 
     # if only one job is given, download in a directory named after the job
     if len(unique_names) == 1:

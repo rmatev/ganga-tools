@@ -149,7 +149,7 @@ def status(j):
     for stat in ["new","submitting","submitted","running","failed","completing","completed"]:
         l = len(j.subjobs.select(status=stat))
         if l > 0:
-            print stat+":", l
+            print(stat+":", l)
 
 
 def memoize(obj):

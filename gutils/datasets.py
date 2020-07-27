@@ -46,7 +46,7 @@ def bkMetadata(dataset):
         raise TypeError('Expect an LHCbDataset object')
     m = dataset.bkMetadata()
     if m['Failed']:
-       print m
+       logger.error(m)
        raise RuntimeError("bkMetadata call failed")
     return m['Successful']
 

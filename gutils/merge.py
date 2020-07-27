@@ -5,9 +5,9 @@ import GangaCore
 
 logger = GangaCore.Utility.logging.getLogger('gutils.merge')
 
-from utils import subjobs, outputfiles
-from download import download_temp, get_access_urls
-from root_utils import get_tree_enties
+from .utils import subjobs, outputfiles
+from .download import download_temp, get_access_urls
+from .root_utils import get_tree_enties
 
 
 def _getrootprefix_patch(rootsys=None):

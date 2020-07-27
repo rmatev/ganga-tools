@@ -33,14 +33,14 @@ def _get_tree_entries(files, ignore_empty=False, ignore_missing=False):
         file0 = TFile.Open(f)
         if not file0:
             if ignore_missing:
-                print "Warning: Can't find/open file: "+f
+                print("Warning: Can't find/open file: "+f)
                 continue
             raise IOError("Can't find/open file: "+f)
 
         trees = _get_trees(file0)
         if not trees:
             if ignore_empty:
-                print 'Warning: No TTree objects found in '+f
+                print('Warning: No TTree objects found in '+f)
                 continue
             raise ValueError('No TTree objects found in '+f)
 
@@ -63,4 +63,4 @@ def get_tree_enties(files, ignore_empty=False, ignore_missing=False):
 if __name__ == '__main__':
     import sys
     cmd = sys.argv[1]
-    print repr(eval(cmd))
+    print(repr(eval(cmd)))

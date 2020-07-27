@@ -8,7 +8,7 @@ import GangaDirac
 import GangaCore
 from GangaCore.GPIDev.Base.Proxy import GPIProxyObject
 from GangaCore.GPIDev.Adapters.IGangaFile import IGangaFile
-from utils import ganga_type, outputfiles
+from .utils import ganga_type, outputfiles
 
 logger = GangaCore.Utility.logging.getLogger('gutils.download')
 
