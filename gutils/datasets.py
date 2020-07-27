@@ -69,11 +69,15 @@ def get_raw_dataset_runs(runs, streams, warn=True):
         path = '/{}-{}/Real Data/{}/RAW'.format(min(subruns), max(subruns), streams[0])
         logger.info('BK query: {}'.format(path))
         query = BKQuery(dqflag='All', type='Run', path=path)
-        ds.files += query.getDataset().files
+        ds.files += query.getDataset(compressed=False).files
+        # TODO use LHCbCompressedDataset instead
         m.update(bkMetadata(ds))
 
     # Select only the files corresponding to requested runs
-    ds.files = [f for f in ds.files if m[f.lfn]['RunNumber'] in runs]
+    try:
+        ds.files = [f for f in ds.files if m[f.lfn]['RunNumber'] in runs]
+    except:
+        import pdb; pdb.set_trace()
     # Check if there are remaining runs and if so use the next stream
     runs_out = set(x['RunNumber'] for x in m.values())
     runs_remain = list(set(runs) - runs_out)

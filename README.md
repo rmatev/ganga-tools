@@ -71,11 +71,15 @@ git clone https://github.com/rmatev/ganga-tools.git ~/ganga-tools
 Second, edit `~/.gangarc` by uncommenting `RUNTIME_PATH` and appending the
 appropriate path, e.g.:
 ```
-#RUNTIME_PATH = GangaDirac:GangaGaudi:GangaLHCb:
+#RUNTIME_PATH = GangaDirac:GangaGaudi:GangaLHCb
 ```
 becomes
 ```
-RUNTIME_PATH = GangaDirac:GangaGaudi:GangaLHCb:~/ganga-tools/GangaLHCbExt:
+RUNTIME_PATH = GangaDirac:GangaGaudi:GangaLHCb:~/ganga-tools/GangaLHCbExt
+```
+The default LHCb-specific value of `RUNTIME_PATH` can be found from
+```
+grep RUNTIME_PATH /cvmfs/ganga.cern.ch/Ganga/install/LATEST/lib/python3.6/site-packages/ganga/GangaLHCb/LHCb.in
 ```
 
 Third, (optional) add `~/ganga-tools/scripts` to the `PATH` environment
