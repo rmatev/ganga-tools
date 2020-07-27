@@ -101,9 +101,9 @@ def smart_jobs_select(specs):
         else:
             assert False
         if not m.group('remove'):
-            jobs += filter(lambda j: j not in jobs, sjobs)  # add only unique
+            jobs += [j for j in sjobs if j not in jobs]  # add only unique
         else:
-            jobs = filter(lambda j: j not in sjobs, jobs)  # keep only non-removed
+            jobs = [j for j in jobs if j not in sjobs]  # keep only non-removed
 
     return jobs
 

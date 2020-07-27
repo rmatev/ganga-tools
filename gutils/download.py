@@ -84,7 +84,7 @@ def download_temp(jobs, name, ignore_missing=True, keep_temp=False, **kwargs):
 
 
 def dirac_get_access_urls(lfns):
-    if isinstance(lfns, basestring):
+    if isinstance(lfns, str):
         lfns = [lfns]
     if not lfns:
         return {}

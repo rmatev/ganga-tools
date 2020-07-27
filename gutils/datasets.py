@@ -73,7 +73,7 @@ def get_raw_dataset_runs(runs, streams, warn=True):
         m.update(bkMetadata(ds))
 
     # Select only the files corresponding to requested runs
-    ds.files = filter(lambda f: m[f.lfn]['RunNumber'] in runs, ds.files)
+    ds.files = [f for f in ds.files if m[f.lfn]['RunNumber'] in runs]
     # Check if there are remaining runs and if so use the next stream
     runs_out = set(x['RunNumber'] for x in m.values())
     runs_remain = list(set(runs) - runs_out)
@@ -103,7 +103,7 @@ def get_raw_dataset_fill(fill, streams, destinations=None, runtypes=None):
         destinations = set(map(str.upper, destinations))
         runs = [run for run in runs if dest(runinfos[run]) & destinations]
     if runtypes:
-        runtypes = map(str.upper, runtypes)
+        runtypes = list(map(str.upper, runtypes))
         runs = [run for run in runs if runinfos[run]['ConfigVersion'].upper() in runtypes]
     if not runs:
         return None

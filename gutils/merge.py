@@ -1,6 +1,6 @@
 import os
 import shutil
-from urlparse import urlparse
+from urllib.parse import urlparse
 import GangaCore
 
 logger = GangaCore.Utility.logging.getLogger('gutils.merge')
